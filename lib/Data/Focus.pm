@@ -11,11 +11,46 @@ __END__
 
 =head1 NAME
 
-Data::Focus - abstract
+Data::Focus - generic getter/setter/traverser for complex data structures
 
 =head1 SYNOPSIS
 
 =head1 DESCRIPTION
+
+=head1 EXPORTABLE FUNCTIONS
+
+These functions are exported only by request.
+
+=head2 $focused = focus($target, @lenses)
+
+Alias of C<< Data::Focus->new(target => $target, lens => \@lenses) >>.
+It creates a L<Data::Focus> object. C<@lenses> are optional.
+
+=head1 CLASS METHODS
+
+=head2 $focused = Data::Focus->new(%args)
+
+The constructor. Fields in C<%args> are:
+
+=over
+
+=item C<target> => SCALAR (mandatory)
+
+=item C<lens> => LENS or ARRAYREF_OF_LENSES (optional)
+
+=back
+
+=head1 OBJECT METHODS
+
+=head2 $deeper_focused = $focused->into(@lenses)
+
+=head2 $datum = $focused->get(@lenses)
+
+=head2 @data = $focused->list(@lenses)
+
+=head2 $modified_target = $focused->set(@lenses, $datum)
+
+=head2 $modified_target = $focused->over(@lenses, $updater)
 
 =head1 SEE ALSO
 
