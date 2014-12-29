@@ -4,8 +4,8 @@ use warnings;
 use parent qw(Data::Focus::Applicative);
 
 sub build_result {
-    my ($class_self, $rebuilder, $original, @f_parts) = @_;
-    return (@f_parts == 0) ? $original : $rebuilder->($original, @f_parts);
+    my ($class_self, $builder, $original, @f_parts) = @_;
+    return (@f_parts == 0) ? $original : $builder->($original, @f_parts);
     ## In Identity applicative functor, f b = b, f t = t
 }
 
