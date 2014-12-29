@@ -14,13 +14,13 @@ use Data::Focus::Applicative::Identity;
         return $class->build_result(undef, $datum);
     }
 
-    sub pure_ap {
+    sub fmap {
         my ($class, $func, $f_datum) = @_;
         return $class->build_result(sub { $func->($_[1]) }, undef, $f_datum);
     }
 
     sub equals {
-        my ($self, $other) = @_;
+        my ($class, $self, $other) = @_;
         return $self->run_identity eq $other->run_identity;
     }
 }
@@ -28,9 +28,16 @@ use Data::Focus::Applicative::Identity;
 my $c = "Data::Focus::Applicative::Identity";
 
 {
-    note("--- identity law");
     my $id = sub { $_[0] };
-    ok $c->pure_ap($id, $c->pure("hoge"))->equals($c->pure("hoge"));
+    ok($c->equals( $c->fmap($id, $c->pure("hoge")), $id->($c->pure("hoge")) ), "functor first law");
+
+    my $f = sub { $_[0] + 10 };
+    my $g = sub { $_[0] * 20 };
+    my $fg = sub { $f->($g->($_[0])) };
+    my $fmapf_fmapg = sub { $c->fmap($f, $c->fmap($g, $_[0]))  };
+    ok($c->equals( $c->fmap($fg, $c->pure(1)),
+                   $fmapf_fmapg->($c->pure(1)) ),
+       "functor second law");
 }
 
 done_testing;
