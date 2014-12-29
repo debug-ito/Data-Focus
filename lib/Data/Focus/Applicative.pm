@@ -42,6 +42,9 @@ where C<@parts> are the data inside C<@f_parts> applicative functors.
 C<$builder> is supposed to set C<@parts> into C<$original> (whether or not it's destructive),
 and return the C<$built_data>.
 
+C<@f_parts> are zero or more L<Data::Focus::Applicative> objects.
+C<$f_result> is a L<Data::Focus::Applicative> object.
+
 =head1 AUTHOR
  
 Toshio Ito, C<< <toshioito at cpan.org> >>

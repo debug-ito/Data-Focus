@@ -3,12 +3,21 @@ use strict;
 use warnings;
 use parent qw(Data::Focus::Applicative);
 
-sub build_result {
-    my ($class_self, $builder, $original, @f_parts) = @_;
-    return (@f_parts == 0) ? $original : $builder->($original, @f_parts);
-    ## In Identity applicative functor, f b = b, f t = t
+sub new {
+    my ($class, $datum) = @_;
+    return bless \$datum, $class;
 }
 
+sub build_result {
+    my ($class, $builder, $original, @f_parts) = @_;
+    return (@f_parts == 0) ? $class->new($original)
+        : $class->new($builder->($original, map { $_->run_identity } @f_parts));
+    ## should we type-check @f_parts?
+}
+
+sub run_identity {
+    return ${$_[0]};
+}
 
 1;
 __END__
@@ -26,6 +35,17 @@ B<< Internal use only. >>
 An L<Data::Focus::Applicative> class for Haskell's L<Identity|http://hackage.haskell.org/package/transformers/docs/Data-Functor-Identity.html>
 applicative functor.
 
+=head1 CLASS METHODS
+
+=head2 build_result
+
+See L<Data::Focus::Applicative>.
+
+=head2 $f_datum = Data::Focus::Applicative::Identity->new($datum)
+
+=head1 OBJECT METHODS
+
+=head2 $datum = $f_datum->run_identity()
 
 =head1 AUTHOR
  
