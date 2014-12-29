@@ -27,6 +27,19 @@ use Data::Focus::Applicative::Identity;
 
 my $c = "Data::Focus::Applicative::Identity";
 
+## fmap id v = id v
+
+## pure id <*> v = v <- Applicative identity law
+
+## id <$> v = id v = v
+
+## fmap f x = pure f <*> x  <- Applicative - Functor law
+
+## ならば、 f <$> x <*> y <*> z = pure f <*> x <*> y <*> z -> composition lawは検証できるか？ いや、右辺を作ることができない。うーむ。
+
+##  pure f <*> pure x = pure (f x)  => f <$> pure x = pure ( f x )  homomorphism law (これは検証できそう)
+
+
 {
     my $id = sub { $_[0] };
     ok($c->equals( $c->fmap($id, $c->pure("hoge")), $id->($c->pure("hoge")) ), "functor first law");
