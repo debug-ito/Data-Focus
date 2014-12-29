@@ -3,10 +3,14 @@ use strict;
 use warnings;
 use Test::More;
  
-plan tests => 1;
- 
 BEGIN {
-    use_ok( 'Data::Focus' ) || print "Bail out!\n";
+    foreach my $name (
+        "", "::Applicative", "::Applicative::Identity"
+    ) {
+        use_ok( "Data::Focus$name" );
+    }
 }
  
 diag( "Testing Data::Focus $Data::Focus::VERSION, Perl $], $^X" );
+
+done_testing;
