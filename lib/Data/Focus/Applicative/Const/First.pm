@@ -1,6 +1,18 @@
 package Data::Focus::Applicative::Const::First;
 use strict;
 use warnings;
+use parent qw(Data::Focus::Applicative::Const);
+
+sub mempty { undef }
+sub mconcat {
+    my $class = shift;
+    my $datum = $class->mempty;
+    while(@_) {
+        $datum = shift;
+        return $datum if defined $datum;
+    }
+    return $datum;
+}
 
 1;
 __END__

@@ -8,7 +8,11 @@ use testlib::ApplicativeUtil qw(make_applicative_methods test_functor_basic);
 
 my $c = "Data::Focus::Applicative::Const::First";
 
-make_applicative_methods($c, sub { $_[0]->get_const eq $_[1]->get_const });
+make_applicative_methods($c, sub {
+    my ($da, $db) = map { $_->get_const } @_;
+    return (defined($da) && defined($db)) ? $da eq $db : !(defined($da) xor defined($db));
+});
+
 test_functor_basic($c);
 
 {
@@ -35,7 +39,7 @@ foreach my $case (
     is($c->mconcat(@{$case->{input}}), $case->{exp}, "mconcat: $case->{label}");
 }
 
-is($c->fmap_ap(sub { die "this should not be called" }, map { $c->pure($_) } undef, undef, 30, 20, 10)->get_const,
+is($c->fmap_ap(sub { die "this should not be called" }, map { $c->new($_) } undef, undef, 30, 20, 10)->get_const,
    30,
    "fmap_ap");
 

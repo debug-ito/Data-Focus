@@ -1,6 +1,25 @@
 package Data::Focus::Applicative::Const;
 use strict;
 use warnings;
+use parent qw(Data::Focus::Applicative);
+
+sub new {
+    my ($class, $datum) = @_;
+    return bless \$datum, $class;
+}
+
+sub build_result {
+    my ($class, $builder, $original, @f_parts) = @_;
+    return @f_parts == 0 ? $class->new($class->mempty)
+        : $class->new($class->mconcat(map { $_->get_const } @f_parts));
+}
+
+sub get_const {
+    return ${$_[0]};
+}
+
+sub mempty { die "not implemented" }
+sub mconcat { die "not implemented" }
 
 1;
 __END__
