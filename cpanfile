@@ -1,6 +1,7 @@
 
 requires "parent";
 requires "Carp";
+requires "Exporter";
 
 on 'test' => sub {
     requires 'Test::More' => "0";

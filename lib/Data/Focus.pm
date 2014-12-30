@@ -3,8 +3,16 @@ use strict;
 use warnings;
 use Data::Focus::Lens::HashArrayIndex;
 use Carp;
+use Exporter qw(import);
 
 our $VERSION = "0.01";
+
+our @EXPORT_OK = qw(focus);
+
+sub focus {
+    my ($target, @lenses) = @_;
+    return __PACKAGE__->new(target => $target, lens => \@lenses);
+}
 
 sub new {
     my ($class, %args) = @_;
