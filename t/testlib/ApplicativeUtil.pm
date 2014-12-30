@@ -5,7 +5,7 @@ use Exporter qw(import);
 use Test::More;
 use Test::Identity;
 
-our @EXPORT_OK = qw(make_applicative_methods test_functor_basic);
+our @EXPORT_OK = qw(make_applicative_methods test_functor_basic test_const_basic);
 
 sub make_applicative_methods {
     my ($target_class, $equals_code) = @_;
@@ -68,6 +68,17 @@ sub test_functor_basic {
         isa_ok $built, $c;
         isa_ok $built, "Data::Focus::Applicative";
     }
+}
+
+sub test_const_basic {
+    my ($c) = @_;
+    note("--- $c: common for all Const functors");
+    my $count = 0;
+    my $result = $c->fmap_ap(sub { $count++ }, map { $c->pure($_) } 10, 20, 30);
+    isa_ok $result, $c;
+    isa_ok $result, "Data::Focus::Applicative";
+    isa_ok $result, "Data::Focus::Applicative::Const";
+    is $count, 0, "Const functor never executes the mapper";
 }
 
 1;
