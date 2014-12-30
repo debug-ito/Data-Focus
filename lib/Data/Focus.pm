@@ -1,8 +1,79 @@
 package Data::Focus;
 use strict;
 use warnings;
+use Data::Focus::Lens::HashArrayIndex;
+use Carp;
 
 our $VERSION = "0.01";
+
+sub new {
+    my ($class, %args) = @_;
+    croak "target param is mandatory" if !exists($args{target});
+    my $target = $args{target};
+    my $lenses = [];
+    if(exists($args{lens})) {
+        if(ref($args{lens}) eq "ARRAY") {
+            $lenses = $args{lens};
+        }else {
+            $lenses = [$args{lens}];
+        }
+    }
+    @$lenses = map {
+        eval { $_->isa("Data::Focus::Lens") }
+            ? $_
+            : Data::Focus::Lens::HashArrayIndex->new(key => $_)  ## default lens (for now)
+    } @$lenses;
+    my $self = bless {
+        target => $target,
+        lenses => $lenses
+    }, $class;
+    return $self;
+}
+
+sub into {
+    my ($self, @lenses) = @_;
+    my $deeper = ref($self)->new(
+        target => $self->{target},
+        lens => [@{$self->{lenses}}, @lenses]
+    );
+    return $deeper;
+}
+
+sub _create_whole_mapper {
+    my ($app_class, @lenses) = @_;
+    my $part_mapper = sub { $app_class->new(shift) };
+    while(defined(my $lens = pop @lenses)) {
+        $part_mapper = $lens->apply($part_mapper, $app_class);
+    }
+    return $part_mapper;
+}
+
+sub get {
+    my ($self, @lenses) = @_;
+    require Data::Focus::Applicative::Const::First;
+    my $whole_mapper = _create_whole_mapper("Data::Focus::Applicative::Const::First", @{$self->{lenses}}, @lenses);
+    return $whole_mapper->($self->{target})->get_const;
+}
+
+sub list {
+    my ($self, @lenses) = @_;
+    require Data::Focus::Applicative::Const::List;
+    my $whole_mapper = _create_whole_mapper("Data::Focus::Applicative::Const::List", @{$self->{lenses}}, @lenses);
+    my $traversed_list = $whole_mapper->($self->{target})->get_const;
+    return wantarray ? @$traversed_list : $traversed_list->[0];
+}
+
+sub over {
+    my $updater = pop;
+    my ($self, @lenses) = @_;
+    TBW;
+}
+
+sub set {
+    my $datum = pop;
+    my $self = shift;
+    return $self->over(@_, sub { $datum });
+}
 
 1;
 __END__
