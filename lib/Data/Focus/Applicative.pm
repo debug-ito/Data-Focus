@@ -33,7 +33,7 @@ In pseudo-Haskell, this is equivalent to
 
 I think this is the only pattern where applicative functors are used in Lens implementations.
 
-C<$builder> is a code-ref, which may be called
+C<$builder> is a code-ref, which may be called zero or more times
 
     $built_data = $builder->($original, @parts)
 
