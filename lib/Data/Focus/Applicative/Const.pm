@@ -39,7 +39,7 @@ applicative functor.
 
 This is an abstract class.
 Subclasses must implement C<mempty()> and C<mconcat()> class methods,
-which specifies the L<Monoid|http://hackage.haskell.org/package/base/docs/Data-Monoid.html> behind this class.
+which define the L<Monoid|http://hackage.haskell.org/package/base/docs/Data-Monoid.html> behind this class.
 
 =head1 CLASS METHODS
 
