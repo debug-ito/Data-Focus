@@ -32,7 +32,7 @@ Both of C<$part_mapper> and C<$whole_mapper> are code-refs, and they have the sa
 where C<$before_data> is the data before mapping, and C<$f_after_data> is the data after mapping wrapped
 in a L<Data::Focus::Applicative> object.
 
-C<$aplicative_class> is the name of a L<Data::Focus::Applicative> subclass.
+C<$applicative_class> is the name of a L<Data::Focus::Applicative> subclass.
 The return value from C<$part_mapper> and C<$whole_mapper> must be an object of this class.
 Generally speaking, it defines the "context" in which this lens operation is performed.
 
