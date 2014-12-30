@@ -32,7 +32,7 @@ Data::Focus::Applicative::Identity - Identity applicative functor for Data::Focu
 
 B<< Internal use only. >>
 
-An L<Data::Focus::Applicative> class for Haskell's L<Identity|http://hackage.haskell.org/package/transformers/docs/Data-Functor-Identity.html>
+A L<Data::Focus::Applicative> class for Haskell's L<Identity|http://hackage.haskell.org/package/transformers/docs/Data-Functor-Identity.html>
 applicative functor.
 
 =head1 CLASS METHODS
