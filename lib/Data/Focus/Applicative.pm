@@ -17,6 +17,9 @@ B<< Internal use only. >>
 
 This class specifies the common interface for all applicative functors used in L<Data::Focus> distribution.
 
+All applicative functors must inherit L<Data::Focus::Applicative>, and implement the following methods.
+
+
 =head1 CLASS METHODS
 
 =head2 $f_result = $class->build_result($builder, $original, @f_parts)
