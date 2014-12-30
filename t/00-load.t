@@ -5,7 +5,10 @@ use Test::More;
  
 BEGIN {
     foreach my $name (
-        "", "::Applicative", "::Applicative::Identity"
+        "",
+        "::Applicative", "::Applicative::Identity", "::Applicative::Const",
+        "::Applicative::Const::First", "::Applicative::Const::List",
+        "::Lens", "::Lens::HashArrayIndex",
     ) {
         use_ok( "Data::Focus$name" );
     }

@@ -40,8 +40,8 @@ sub into {
 }
 
 sub _create_whole_mapper {
-    my ($app_class, @lenses) = @_;
-    my $part_mapper = sub { $app_class->new(shift) };
+    my ($app_class, $part_mapper, @lenses) = @_;
+    $part_mapper ||= sub { $app_class->new(shift) };
     while(defined(my $lens = pop @lenses)) {
         $part_mapper = $lens->apply($part_mapper, $app_class);
     }
@@ -51,14 +51,16 @@ sub _create_whole_mapper {
 sub get {
     my ($self, @lenses) = @_;
     require Data::Focus::Applicative::Const::First;
-    my $whole_mapper = _create_whole_mapper("Data::Focus::Applicative::Const::First", @{$self->{lenses}}, @lenses);
+    my $whole_mapper = _create_whole_mapper("Data::Focus::Applicative::Const::First", undef,
+                                            @{$self->{lenses}}, @lenses);
     return $whole_mapper->($self->{target})->get_const;
 }
 
 sub list {
     my ($self, @lenses) = @_;
     require Data::Focus::Applicative::Const::List;
-    my $whole_mapper = _create_whole_mapper("Data::Focus::Applicative::Const::List", @{$self->{lenses}}, @lenses);
+    my $whole_mapper = _create_whole_mapper("Data::Focus::Applicative::Const::List", undef,
+                                            @{$self->{lenses}}, @lenses);
     my $traversed_list = $whole_mapper->($self->{target})->get_const;
     return wantarray ? @$traversed_list : $traversed_list->[0];
 }
@@ -66,7 +68,12 @@ sub list {
 sub over {
     my $updater = pop;
     my ($self, @lenses) = @_;
-    TBW;
+    croak "updater param must be a code-ref" if ref($updater) ne "CODE";
+    require Data::Focus::Applicative::Identity;
+    my $app_c = "Data::Focus::Applicative::Identity";
+    my $part_mapper = sub { $app_c->new($updater->($_[0])) };
+    my $whole_mapper = _create_whole_mapper($app_c, $part_mapper, @{$self->{lenses}}, @lenses);
+    return $whole_mapper->($self->{target})->run_identity;
 }
 
 sub set {
