@@ -31,17 +31,8 @@ note("-- preliminary tests");
 
     my $f = focus($target);
     isa_ok $f, "Data::Focus";
-
-    {
-        note("--- non-focused");
-        identical $f->get, $target, "get() returns the target itself";
-        my @list = $f->list;
-        is scalar(@list), 1;
-        identical $list[0], $target, "list() returns the target itself";
-        
-    }
-
     note("--- get()");
+    
     foreach my $case (
         {lenses => ["undef"], exp_g => undef, exp_l => [undef]},
         {lenses => ["string"], exp_g => "STRING", exp_l => ["STRING"]},
@@ -65,6 +56,10 @@ TODO: {
     fail("focusing deeper into str/int/undef/non-existent");
 
     fail("slice lens: duplicate keys (get/set/over)");
+
+    fail("common 'lens law' tests");
+
+    fail("Data::Diver adaptor?");
 }
 
 done_testing;
