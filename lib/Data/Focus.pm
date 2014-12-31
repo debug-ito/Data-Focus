@@ -48,8 +48,8 @@ sub into {
 }
 
 sub _create_whole_mapper {
-    my ($app_class, $part_mapper, @lenses) = @_;
-    $part_mapper ||= sub { $app_class->new(shift) };
+    my ($app_class, $updater, @lenses) = @_;
+    my $part_mapper = $app_class->create_part_mapper($updater);
     while(defined(my $lens = pop @lenses)) {
         $part_mapper = $lens->apply($part_mapper, $app_class);
     }
@@ -78,9 +78,8 @@ sub over {
     my ($self, @lenses) = @_;
     croak "updater param must be a code-ref" if ref($updater) ne "CODE";
     require Data::Focus::Applicative::Identity;
-    my $app_c = "Data::Focus::Applicative::Identity";
-    my $part_mapper = sub { $app_c->new($updater->($_[0])) };
-    my $whole_mapper = _create_whole_mapper($app_c, $part_mapper, @{$self->{lenses}}, @lenses);
+    my $whole_mapper = _create_whole_mapper("Data::Focus::Applicative::Identity", $updater,
+                                            @{$self->{lenses}}, @lenses);
     return $whole_mapper->($self->{target})->run_identity;
 }
 
