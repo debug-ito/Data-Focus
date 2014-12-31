@@ -72,7 +72,7 @@ sub new {
             $whole->{$self->{keys}[$_]} = $parts[$_] foreach 0 .. $#{$self->{keys}}; ## destructive
             return $whole;
         }else {
-            confess "This should not be executed. Something is wrong.";
+            confess "This should not be executed because the getter should return an empty list.";
         }
     };
 
