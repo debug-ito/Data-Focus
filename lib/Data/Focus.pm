@@ -65,7 +65,8 @@ sub get {
     require Data::Focus::Applicative::Const::First;
     my $whole_mapper = $self->_create_whole_mapper("Data::Focus::Applicative::Const::First", undef,
                                                    @lenses);
-    return $whole_mapper->($self->{target})->get_const;
+    my $ret = $whole_mapper->($self->{target})->get_const;
+    return defined($ret) ? $$ret : undef;
 }
 
 sub list {

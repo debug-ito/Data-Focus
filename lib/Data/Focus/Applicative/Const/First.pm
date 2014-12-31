@@ -16,7 +16,7 @@ sub mconcat {
 
 sub create_part_mapper {
     my ($class) = @_;
-    return sub { $class->new(shift) };
+    return sub { my ($datum) = @_; $class->new(\$datum) };
 }
 
 1;
@@ -31,6 +31,8 @@ Data::Focus::Applicative::Const::First - Const applicative functor with First mo
 =head1 DESCRIPTION
 
 B<< Internal use only. >>
+
+This functor accepts a scalar-ref or C<undef> as its value.
 
 =head1 METHODS
 

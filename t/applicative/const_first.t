@@ -23,14 +23,24 @@ note("--- mconcat");
 foreach my $case (
     {label => "empty", input => [], exp => undef},
     {label => "all undef", input => [undef, undef, undef], exp => undef},
-    {label => "single", input => [10], exp => 10},
-    {label => "multi", input => [undef, 20, 30, undef, 50], exp => 20}
+    {label => "single num", input => [\(10)], exp => 10},
+    {label => "single array", input => [\([1,2,3])], exp => [1,2,3]},
+    {label => "single hash", input => [\({a => "hoge"}), \(10)], exp => {a => "hoge"}},
+    {label => "multi", input => [undef, \(20), \(30), undef, \(50)], exp => 20},
+    {label => "multi strings", input => [\("AAA"), \("BBB"), undef], exp => "AAA"},
+    {label => "valid undef", input => [undef, \(undef), \("aa")], exp => undef},
 ) {
-    is($c->mconcat(@{$case->{input}}), $case->{exp}, "mconcat: $case->{label}");
+    my $ret = $c->mconcat(@{$case->{input}});
+    $ret = defined($ret) ? $$ret : undef;
+    is_deeply($ret, $case->{exp}, "mconcat: $case->{label}");
 }
 
-is($c->fmap_ap(sub { die "this should not be called" }, map { $c->new($_) } undef, undef, 30, 20, 10)->get_const,
-   30,
-   "fmap_ap");
+{
+    my $killer = sub { die "this should not be called" };
+    my $f_result = $c->fmap_ap($killer, map { $c->new($_) } undef, undef, \(30), \(20), \(10));
+    is(${$f_result->get_const},
+       30,
+       "fmap_ap");
+}
 
 done_testing;
