@@ -106,6 +106,14 @@ Data::Focus - generic getter/setter/traverser for complex data structures
 
 =head1 DESCRIPTION
 
+- The concept of "focused", "target", "lenses".
+
+=head2 Lenses
+
+=head2 Lens Coercion
+
+=head2 Traversals
+
 =head1 EXPORTABLE FUNCTIONS
 
 These functions are exported only by request.
@@ -133,13 +141,69 @@ The constructor. Fields in C<%args> are:
 
 =head2 $deeper_focused = $focused->into(@lenses)
 
+Focus more deeply with the given C<@lenses> and return the L<Data::Focus> object.
+
+C<$deeper_focused> is a new L<Data::Focus> object. C<$focused> remains unchanged.
+
+For example, these lines do exactly the same thing.
+
+    $result = $focused->into("foo", "bar")->get();
+    $result = $focused->into("foo")->get("bar");
+    $result = $focused->get("foo", "bar");
+
 =head2 $datum = $focused->get(@lenses)
+
+Get the focused C<$datum>.
+
+The arguments C<@lenses> are optional.
+If supplied, C<@lenses> are used to focus more deeply into the C<$focused> to return C<$datum>.
+
+If it focuses on nothing (zero focus), it returns C<undef>.
+
+If it focuses on more than one values, it returns the first value.
 
 =head2 @data = $focused->list(@lenses)
 
+Get the focused C<@data>.
+
+The arguments C<@lenses> are optional.
+If supplied, C<@lenses> are used to focus more deeply into the C<$focused> to return C<@data>.
+
+If it focuses on nothing (zero focus), it returns an empty list.
+
+If it focuses on more than one values, it returns all of them.
+
 =head2 $modified_target = $focused->set(@lenses, $datum)
 
+Set the focused value of the target to C<$datum>, and return the C<$modified_target>.
+
+The arguments C<@lenses> are optional.
+If supplied, C<@lenses> are used to focus more deeply into the C<$focused> to set the C<$datum>.
+
+If it focuses on nothing (zero focus), it modifies nothing. C<$modified_target> is exactly the same as the target object.
+
+If it focuses on more than one values, it sets all of them to C<$datum>.
+
 =head2 $modified_target = $focused->over(@lenses, $updater)
+
+Update the focused value of the target by C<$updater>, and return the C<$modified_target>.
+
+The arguments C<@lenses> are optional.
+If supplied, C<@lenses> are used to focus more deeply into the C<$focused> to execute C<$updater>.
+
+C<$updater> is a code-ref. It is called like
+
+    $modified_datum = $updater->($focused_datum)
+
+where C<$focused_datum> is a datum in the target focused by the lenses.
+C<$modified_datum> replaces the C<$focused_datum> in the C<$modified_target>.
+
+If it focuses on nothing (zero focus), C<$updater> is never called. C<$modified_target> is exactly the same as the target object.
+
+If it focuses on more than one values, C<$updater> is repeatedly called for each of them.
+So C<$updater> should not have side-effects.
+
+=head1 RELATIONSHIP TO HASKELL
 
 =head1 SEE ALSO
 
