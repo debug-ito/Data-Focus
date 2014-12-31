@@ -26,11 +26,7 @@ sub new {
             $lenses = [$args{lens}];
         }
     }
-    @$lenses = map {
-        eval { $_->isa("Data::Focus::Lens") }
-            ? $_
-            : Data::Focus::Lens::HashArrayIndex->new(key => $_)  ## default lens (for now)
-    } @$lenses;
+    @$lenses = map { _coerce_to_lens($_) } @$lenses;
     my $self = bless {
         target => $target,
         lenses => $lenses
@@ -38,17 +34,25 @@ sub new {
     return $self;
 }
 
+sub _coerce_to_lens {
+    my ($maybe_lens) = @_;
+    eval { $maybe_lens->isa("Data::Focus::Lens") }
+        ? $maybe_lens
+        : Data::Focus::Lens::HashArrayIndex->new(key => $maybe_lens);  ## default lens (for now)
+}
+
 sub into {
     my ($self, @lenses) = @_;
     my $deeper = ref($self)->new(
         target => $self->{target},
-        lens => [@{$self->{lenses}}, @lenses]
+        lens => [@{$self->{lenses}}, map { _coerce_to_lens($_) } @lenses]
     );
     return $deeper;
 }
 
 sub _create_whole_mapper {
-    my ($app_class, $updater, @lenses) = @_;
+    my ($self, $app_class, $updater, @additional_lenses) = @_;
+    my @lenses = (@{$self->{lenses}}, map { _coerce_to_lens($_) } @additional_lenses);
     my $part_mapper = $app_class->create_part_mapper($updater);
     while(defined(my $lens = pop @lenses)) {
         $part_mapper = $lens->apply($part_mapper, $app_class);
@@ -59,16 +63,16 @@ sub _create_whole_mapper {
 sub get {
     my ($self, @lenses) = @_;
     require Data::Focus::Applicative::Const::First;
-    my $whole_mapper = _create_whole_mapper("Data::Focus::Applicative::Const::First", undef,
-                                            @{$self->{lenses}}, @lenses);
+    my $whole_mapper = $self->_create_whole_mapper("Data::Focus::Applicative::Const::First", undef,
+                                                   @lenses);
     return $whole_mapper->($self->{target})->get_const;
 }
 
 sub list {
     my ($self, @lenses) = @_;
     require Data::Focus::Applicative::Const::List;
-    my $whole_mapper = _create_whole_mapper("Data::Focus::Applicative::Const::List", undef,
-                                            @{$self->{lenses}}, @lenses);
+    my $whole_mapper = $self->_create_whole_mapper("Data::Focus::Applicative::Const::List", undef,
+                                                   @lenses);
     my $traversed_list = $whole_mapper->($self->{target})->get_const;
     return wantarray ? @$traversed_list : $traversed_list->[0];
 }
@@ -78,8 +82,8 @@ sub over {
     my ($self, @lenses) = @_;
     croak "updater param must be a code-ref" if ref($updater) ne "CODE";
     require Data::Focus::Applicative::Identity;
-    my $whole_mapper = _create_whole_mapper("Data::Focus::Applicative::Identity", $updater,
-                                            @{$self->{lenses}}, @lenses);
+    my $whole_mapper = $self->_create_whole_mapper("Data::Focus::Applicative::Identity", $updater,
+                                                   @lenses);
     return $whole_mapper->($self->{target})->run_identity;
 }
 
