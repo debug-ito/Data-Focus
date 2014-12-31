@@ -113,7 +113,7 @@ Data::Focus - generic getter/setter/traverser for complex data structures
 
 =head2 Lens Coercion
 
-=head2 Traversals
+=head2 Traversals and Focal Points
 
 =head1 EXPORTABLE FUNCTIONS
 
@@ -159,9 +159,9 @@ Get the focused C<$datum>.
 The arguments C<@lenses> are optional.
 If supplied, C<@lenses> are used to focus more deeply into the C<$focused> to return C<$datum>.
 
-If it focuses on nothing (zero focus), it returns C<undef>.
+If it focuses on nothing (zero focal point), it returns C<undef>.
 
-If it focuses on more than one values, it returns the first value.
+If it focuses on more than one values (multiple focal points), it returns the first value.
 
 =head2 @data = $focused->list(@lenses)
 
@@ -170,9 +170,9 @@ Get the focused C<@data>.
 The arguments C<@lenses> are optional.
 If supplied, C<@lenses> are used to focus more deeply into the C<$focused> to return C<@data>.
 
-If it focuses on nothing (zero focus), it returns an empty list.
+If it focuses on nothing (zero focal point), it returns an empty list.
 
-If it focuses on more than one values, it returns all of them.
+If it focuses on more than one values (multiple focal points), it returns all of them.
 
 =head2 $modified_target = $focused->set(@lenses, $datum)
 
@@ -181,9 +181,9 @@ Set the focused value of the target to C<$datum>, and return the C<$modified_tar
 The arguments C<@lenses> are optional.
 If supplied, C<@lenses> are used to focus more deeply into the C<$focused> to set the C<$datum>.
 
-If it focuses on nothing (zero focus), it modifies nothing. C<$modified_target> is exactly the same as the target object.
+If it focuses on nothing (zero focal point), it modifies nothing. C<$modified_target> is exactly the same as the target object.
 
-If it focuses on more than one values, it sets all of them to C<$datum>.
+If it focuses on more than one values (multiple focal points), it sets all of them to C<$datum>.
 
 =head2 $modified_target = $focused->over(@lenses, $updater)
 
@@ -199,9 +199,9 @@ C<$updater> is a code-ref. It is called like
 where C<$focused_datum> is a datum in the target focused by the lenses.
 C<$modified_datum> replaces the C<$focused_datum> in the C<$modified_target>.
 
-If it focuses on nothing (zero focus), C<$updater> is never called. C<$modified_target> is exactly the same as the target object.
+If it focuses on nothing (zero focal point), C<$updater> is never called. C<$modified_target> is exactly the same as the target object.
 
-If it focuses on more than one values, C<$updater> is repeatedly called for each of them.
+If it focuses on more than one values (multiple focal points), C<$updater> is repeatedly called for each of them.
 So C<$updater> should not have side-effects.
 
 =head1 RELATIONSHIP TO HASKELL
