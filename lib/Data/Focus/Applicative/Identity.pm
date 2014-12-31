@@ -15,6 +15,11 @@ sub build_result {
     ## should we type-check @f_parts?
 }
 
+sub create_part_mapper {
+    my ($class, $updater) = @_;
+    return sub { $class->new($updater->(shift)) };
+}
+
 sub run_identity {
     return ${$_[0]};
 }
@@ -38,6 +43,8 @@ applicative functor.
 =head1 CLASS METHODS
 
 =head2 build_result
+
+=head2 create_part_mapper
 
 See L<Data::Focus::Applicative>.
 

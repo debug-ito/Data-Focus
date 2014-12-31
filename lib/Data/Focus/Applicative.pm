@@ -48,6 +48,17 @@ and return the C<$built_data>.
 C<@f_parts> are zero or more L<Data::Focus::Applicative> objects.
 C<$f_result> is a L<Data::Focus::Applicative> object.
 
+=head2 $part_mapper = $class->create_part_mapper($updater)
+
+Create the finest C<$part_mapper> for L<Data::Focus::Lens>.
+
+In Haskell, this method is like
+
+    create_part_mapper :: Applicative f => (a -> b) -> (a -> f b)
+
+C<$updater> is a code-ref. This code-ref is supposed to modify the finest part and return the result.
+Subclasses may or may not use C<$updater> to create C<$part_mapper>.
+
 =head1 AUTHOR
  
 Toshio Ito, C<< <toshioito at cpan.org> >>

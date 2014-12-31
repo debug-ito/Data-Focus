@@ -45,6 +45,8 @@ which define the L<Monoid|http://hackage.haskell.org/package/base/docs/Data-Mono
 
 =head2 build_result
 
+=head2 create_part_mapper
+
 See L<Data::Focus::Applicative>.
 
 =head2 $f_datum = Data::Focus::Applicative::Const->new($datum)

@@ -14,6 +14,11 @@ sub mconcat {
     return $datum;
 }
 
+sub create_part_mapper {
+    my ($class) = @_;
+    return sub { $class->new(shift) };
+}
+
 1;
 __END__
 

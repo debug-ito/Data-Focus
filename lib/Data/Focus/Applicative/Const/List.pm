@@ -9,6 +9,12 @@ sub mconcat {
     return [map { @$_ } @data];
 }
 
+sub create_part_mapper {
+    my ($class) = @_;
+    return sub { $class->new([shift]) };
+}
+
+
 1;
 
 __END__

@@ -68,6 +68,15 @@ sub test_functor_basic {
         isa_ok $built, $c;
         isa_ok $built, "Data::Focus::Applicative";
     }
+    
+    {
+        note("--- $c: create_part_mapper");
+        my $updater = sub { $_[0] };
+        my $mapper = $c->create_part_mapper($updater);
+        is ref($mapper), "CODE";
+        my $result = $mapper->(100);
+        isa_ok $result, $c;
+    }
 }
 
 sub test_const_basic {
