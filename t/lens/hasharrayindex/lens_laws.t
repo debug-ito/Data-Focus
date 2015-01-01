@@ -51,10 +51,9 @@ my @cases = (
     {target => "hash", key => "non-existent", exp_focal_points => 1},
     {target => "array", key => 0, exp_focal_points => 1},
     {target => "array", key => 1, exp_focal_points => 1},
-    {target => "array", key => "str", exp_focal_points => 0},
+    {target => "array", key => 2.5, exp_focal_points => 1},
     {target => "array", key => -3, exp_focal_points => 1}, ## in-range negative index. writable.
-    {target => "array", key => -20, exp_focal_points => 0}, ## out-of-range negative index. non-writable.
-    {target => "array", key => 20, exp_focal_points => 1},
+    {target => "array", key => 20, exp_focal_points => 1}, ## out-of-range positive index. writable.
     {target => "scalar_ref", key => "foo", exp_focal_points => 0},
     {target => "obj", key => "bar", exp_focal_points => 0},
     {target => "undef", key => "str", exp_focal_points => 1}, ## autovivification
@@ -77,6 +76,8 @@ foreach my $case (@cases) {
 TODO: {
     local $TODO = "TBW";
     fail("slice cases");
+    fail("out-of-range negative index. it croaks when set");
+    fail("non-number index for array. it may emit warnings");
 }
 
 done_testing;
