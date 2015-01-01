@@ -33,12 +33,8 @@ sub new {
             ## slots for autovivification
             return map { undef } @{$self->{keys}};
         }elsif($type eq "ARRAY") {
-            foreach my $key (@{$self->{keys}}) {
-                if($key !~ /^\d+$/) {
-                    croak "Key $key: The target is an ARRAY. Key must be integer.";
-                }
-            }
-            return @{$whole}[@{$self->{keys}}];
+            my @indices = map { int($_) } @{$self->{keys}};
+            return @{$whole}[@indices];
         }elsif($type eq "HASH") {
             return @{$whole}{@{$self->{keys}}};
         }else {
@@ -61,12 +57,8 @@ sub new {
         }
         my $type = ref($whole);
         if($type eq "ARRAY") {
-            foreach my $key (@{$self->{keys}}) {
-                if($key !~ /^\d+$/) {
-                    croak "Key $key: The target is an ARRAY. Key must be integer.";
-                }
-            }
-            $whole->[$self->{keys}[$_]] = $parts[$_] foreach 0 .. $#{$self->{keys}}; ## destructive
+            my @indices = map { int($_) } @{$self->{keys}};
+            $whole->[$indices[$_]] = $parts[$_] foreach 0 .. $#indices; ## destructive
             return $whole;
         }elsif($type eq "HASH") {
             $whole->{$self->{keys}[$_]} = $parts[$_] foreach 0 .. $#{$self->{keys}}; ## destructive
@@ -101,7 +93,7 @@ Data::Focus::Lens::HashArray::Index - a lens to focus on element(s) of hash/arra
 =head1 DESCRIPTION
 
 This is an implementation of L<Data::Focus::Lens>,
-which focuses on one or more elements in hashes and arrays.
+which focuses on one or more elements in a hash or array.
 
 Conceptually, this lens does the same as hash/array dereferences and slices.
 
@@ -136,7 +128,7 @@ Negative indices are allowed.
 They create focal points from the end of the array,
 e.g., index of C<-1> means the last element in the array.
 
-Out-of-range negative indices are read-only.
+Negative out-of-range indices are read-only.
 They always return C<undef>.
 If you try to set values, it croaks.
 
@@ -147,7 +139,7 @@ If different values are set to those indices, only the last one takes effect.
 
 When reading, it always returns C<undef>.
 
-When setting, it autovivifies an array-ref if and only if the keys are all positive integers.
+When setting, it autovivifies an array-ref if and only if the keys are all non-negative integers.
 Otherwise, it autovivifies a hash-ref.
 
 =head2 other targets
