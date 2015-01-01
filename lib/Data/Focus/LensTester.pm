@@ -93,7 +93,7 @@ sub _test_get_set {
     subtest "get-set law" => sub {
         foreach my $part (@{$self->{parts}}) {
             my $left_target = $target->();
-            my $left_result = focus($target)->set($lens, focus($target)->get($lens));
+            my $left_result = focus($left_target)->set($lens, focus($left_target)->get($lens));
             $self->{test_whole}->($left_result, $left_target);
             _check_mutate("get_set", $left_target, $left_result, $exp_mutate, $exp_focal_points);
         }

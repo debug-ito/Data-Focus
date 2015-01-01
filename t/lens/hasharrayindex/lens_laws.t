@@ -7,7 +7,12 @@ use lib "t";
 use testlib::SampleObject;
 
 my $tester = Data::Focus::LensTester->new(
-    test_whole => sub { is_deeply(@_) },
+    test_whole => sub {
+        is_deeply(@_) or do {
+            diag("whole1: " . explain($_[0]));
+            diag("whole2: " . explain($_[1]));
+        };
+    },
     test_part  => sub { is_deeply(@_) },
     parts => [
         undef, 10, "aaa", \("bbb"),
