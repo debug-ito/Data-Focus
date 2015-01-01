@@ -46,6 +46,11 @@ sub new {
     my $setter = sub {
         my ($self, $whole, @parts) = @_;
         if(!defined($whole)) {
+            if(!grep { defined($_) } @parts) {
+                ## If the written parts are all undef, it won't autovivify.
+                ## This is necessary to meet "get-set" law.
+                return undef;
+            }
             ## autovivifying
             if(grep { $_ !~ /^\d+$/ } @{$self->{keys}}) {
                 return +{ map { $self->{keys}[$_] => $parts[$_] } 0 .. $#{$self->{keys}} };
@@ -139,8 +144,10 @@ If different values are set to those indices, only the last one takes effect.
 
 When reading, it always returns C<undef>.
 
-When setting, it autovivifies an array-ref if and only if the keys are all non-negative integers.
-Otherwise, it autovivifies a hash-ref.
+When writing, it autovivifies if the written value is defined. It does not autovivify if the written value is C<undef>.
+
+When autovivifying, it creates  an array-ref if and only if the keys are all non-negative integers.
+Otherwise, it creates a hash-ref.
 
 =head2 other targets
 

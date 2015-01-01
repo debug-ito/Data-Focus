@@ -8,10 +8,7 @@ use testlib::SampleObject;
 
 my $tester = Data::Focus::LensTester->new(
     test_whole => sub {
-        is_deeply(@_) or do {
-            diag("whole1: " . explain($_[0]));
-            diag("whole2: " . explain($_[1]));
-        };
+        is_deeply(@_);
     },
     test_part  => sub { is_deeply(@_) },
     parts => [
@@ -56,19 +53,20 @@ my @cases = (
     {target => "array", key => 20, exp_focal_points => 1}, ## out-of-range positive index. writable.
     {target => "scalar_ref", key => "foo", exp_focal_points => 0},
     {target => "obj", key => "bar", exp_focal_points => 0},
-    {target => "undef", key => "str", exp_focal_points => 1}, ## autovivification
-    {target => "undef", key => 5, exp_focal_points => 1}, ## autovivification
+    {target => "undef", key => "str", exp_focal_points => 1, exp_mutate => 0}, ## autovivification
+    {target => "undef", key => 5, exp_focal_points => 1, exp_mutate => 0}, ## autovivification
 );
 
 foreach my $case (@cases) {
     my $lens = Data::Focus::Lens::HashArray::Index->new(
         key => $case->{key},
     );
+    my $exp_mutate = defined($case->{exp_mutate}) ? $case->{exp_mutate} : 1;
     subtest "$case->{target}, $case->{key}" => sub {
         $tester->test_lens(
             lens => $lens, target => $targets{$case->{target}},
             exp_focal_points => $case->{exp_focal_points},
-            exp_mutate => 1
+            exp_mutate => $exp_mutate,
         );
     };
 }
