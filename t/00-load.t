@@ -9,6 +9,7 @@ BEGIN {
         "::Applicative", "::Applicative::Identity", "::Applicative::Const",
         "::Applicative::Const::First", "::Applicative::Const::List",
         "::Lens", "::Lens::HashArray::Index",
+        "::LensTester",
     ) {
         use_ok( "Data::Focus$name" );
     }
