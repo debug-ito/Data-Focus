@@ -208,6 +208,18 @@ So C<$updater> should not have side-effects.
 
 =head1 SEE ALSO
 
+=head1 TODO
+
+=over
+
+=item *
+
+Option to expect specific number of focal points.
+If it fails, it croaks.
+(Haskell's statically typed Lens always has exactly one focal point. Maybe it's not Perl-friendly, though...)
+
+=back
+
 =head1 REPOSITORY
 
 L<https://github.com/debug-ito/Data-Focus>
