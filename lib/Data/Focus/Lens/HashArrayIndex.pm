@@ -110,31 +110,31 @@ Conceptually, this lens does the same as hash/array dereferences and slices.
     $array->[4]
     @{$array}[3,4,5]
 
-This lens never autovivifies when reading, while by default it DOES autovivify when writing.
+This lens never autovivifies when reading, while it DOES autovivify when writing.
 
 Detailed behaviors of this lens are described below for each target type.
 
 =head2 HASH target
 
-If the target is a hash-ref, this lens bahaves as hash dereference and slice.
+If the target is a hash-ref, this lens behaves as hash dereference and slice.
 
 Duplicate keys in a slice are allowed.
 If different values are set to those keys, only the last one takes effect.
 
-## TBW: non-existent keys?
+It returns C<undef> for non-existent keys. You can set values for them.
 
 =head2 ARRAY target
 
-If the target is an array-ref, this lens bahaves as array dereference and slice.
+If the target is an array-ref, this lens behaves as array dereference and slice.
 The keys are cast to integers.
 
 Positive out-of-range indices are allowed.
-C<get()> and C<list()> returns C<undef> for those indices.
+C<get()> and C<list()> return C<undef> for those indices.
 When set, it extends the array.
 
 Negative indices are allowed.
 They create focal points from the end of the array,
-i.e., index of C<-1> means the last element in the array.
+e.g., index of C<-1> means the last element in the array.
 
 Out-of-range negative indices are read-only.
 They always return C<undef>.
@@ -143,15 +143,18 @@ If you try to set values, it croaks.
 Duplicate indices in a slice are allowed.
 If different values are set to those indices, only the last one takes effect.
 
-## TBW: non-existent keys?
-
 =head2 undef target
 
-## TBW: how to autovivify?
+When reading, it always returns C<undef>.
+
+When setting, it autovivifies an array-ref if and only if the keys are all positive integers.
+Otherwise, it autovivifies a hash-ref.
 
 =head2 other targets
 
-## TBW: no focal point for those cases.
+For other types of targets including scalar-refs and blessed objects,
+the lens creates no focal point.
+This means C<get()> returns C<undef> and C<set()> does nothing.
 
 =head1 CLASS METHODS
 
@@ -169,10 +172,6 @@ Key to focus. When you specify an array-ref, the C<$lens> behaves like slice.
 
 If set to true, the target hash/array is treated as immutable.
 This means every updating operation using the C<$lens> creates a new hash/array in a copy-on-write fashion.
-
-=item ???
-
-## TODO: Option to change handling of non-existent keys. I think it affects $focused->list() and setters (autovivification when writing). How should we name it?
 
 =back
 
