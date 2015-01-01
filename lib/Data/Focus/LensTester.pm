@@ -29,7 +29,7 @@ sub test_lens {
     my $exp_mutate = $args{exp_mutate};
 
     subtest "focal points" => sub {
-        my @ret = focus($target)->list($lens);
+        my @ret = focus($target->())->list($lens);
         is scalar(@ret), $exp_focal_points, "list() returns $exp_focal_points focal points";
     };
 
