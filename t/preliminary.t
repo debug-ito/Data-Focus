@@ -54,12 +54,15 @@ TODO: {
     fail("autovivification or not");
     fail("how to chooose hash or array. especially when autovivifying");
     fail("focusing deeper into str/int/undef/non-existent");
+    fail("nested target and lens composition of different types. maybe traverse -> index, index -> traverse.");
 
     fail("slice lens: duplicate keys (get/set/over)");
 
     fail("common 'lens law' tests");
 
     fail("Data::Diver adaptor?");
+
+    fail("option to expect specific number of focal points?? If the expectation fails, it croaks");
 }
 
 done_testing;

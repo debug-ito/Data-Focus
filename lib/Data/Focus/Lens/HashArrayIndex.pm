@@ -110,7 +110,48 @@ Conceptually, this lens does the same as hash/array dereferences and slices.
     $array->[4]
     @{$array}[3,4,5]
 
-This lens never autovivifies when reading, while it DOES autovivify when writing by default.
+This lens never autovivifies when reading, while by default it DOES autovivify when writing.
+
+Detailed behaviors of this lens are described below for each target type.
+
+=head2 HASH target
+
+If the target is a hash-ref, this lens bahaves as hash dereference and slice.
+
+Duplicate keys in a slice are allowed.
+If different values are set to those keys, only the last one takes effect.
+
+## TBW: non-existent keys?
+
+=head2 ARRAY target
+
+If the target is an array-ref, this lens bahaves as array dereference and slice.
+The keys are cast to integers.
+
+Positive out-of-range indices are allowed.
+C<get()> and C<list()> returns C<undef> for those indices.
+When set, it extends the array.
+
+Negative indices are allowed.
+They create focal points from the end of the array,
+i.e., index of C<-1> means the last element in the array.
+
+Out-of-range negative indices are read-only.
+They always return C<undef>.
+If you try to set values, it croaks.
+
+Duplicate indices in a slice are allowed.
+If different values are set to those indices, only the last one takes effect.
+
+## TBW: non-existent keys?
+
+=head2 undef target
+
+## TBW: how to autovivify?
+
+=head2 other targets
+
+## TBW: no focal point for those cases.
 
 =head1 CLASS METHODS
 
