@@ -8,7 +8,7 @@ BEGIN {
         "",
         "::Applicative", "::Applicative::Identity", "::Applicative::Const",
         "::Applicative::Const::First", "::Applicative::Const::List",
-        "::Lens", "::Lens::HashArrayIndex",
+        "::Lens", "::Lens::HashArray::Index",
     ) {
         use_ok( "Data::Focus$name" );
     }

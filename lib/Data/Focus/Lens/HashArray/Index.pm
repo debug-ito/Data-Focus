@@ -1,4 +1,4 @@
-package Data::Focus::Lens::HashArrayIndex;
+package Data::Focus::Lens::HashArray::Index;
 use strict;
 use warnings;
 use parent qw(Data::Focus::Lens);
@@ -96,7 +96,7 @@ __END__
 
 =head1 NAME
 
-Data::Focus::Lens::HashArrayIndex - a lens to focus on element(s) of hash/array
+Data::Focus::Lens::HashArray::Index - a lens to focus on element(s) of hash/array
 
 =head1 DESCRIPTION
 
@@ -158,7 +158,7 @@ This means C<get()> returns C<undef> and C<set()> does nothing.
 
 =head1 CLASS METHODS
 
-=head2 $lens = Data::Focus::Lens::HashArrayIndex->new(%args)
+=head2 $lens = Data::Focus::Lens::HashArray::Index->new(%args)
 
 The constructor. Fields in C<%args> are:
 
@@ -183,7 +183,7 @@ See L<Data::Focus::Lens>.
 
 =head1 TODO
 
-Maybe we could use less featured and faster version of this, like Data::Focus::Lens::HashArrayIndex::Lite.
+Maybe we could use less featured and faster version of this, like Data::Focus::Lens::HashArray::Index::Lite.
 
 =head1 AUTHOR
  

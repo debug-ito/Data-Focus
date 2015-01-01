@@ -2,7 +2,7 @@ use strict;
 use warnings FATAL => "all";
 use Test::More;
 use Data::Focus::LensTester;
-use Data::Focus::Lens::HashArrayIndex;
+use Data::Focus::Lens::HashArray::Index;
 use lib "t";
 use testlib::SampleObject;
 
@@ -62,7 +62,7 @@ my @cases = (
 );
 
 foreach my $case (@cases) {
-    my $lens = Data::Focus::Lens::HashArrayIndex->new(
+    my $lens = Data::Focus::Lens::HashArray::Index->new(
         key => $case->{key},
     );
     subtest "$case->{target}, $case->{key}" => sub {

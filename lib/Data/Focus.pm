@@ -1,7 +1,7 @@
 package Data::Focus;
 use strict;
 use warnings;
-use Data::Focus::Lens::HashArrayIndex;
+use Data::Focus::Lens::HashArray::Index;
 use Carp;
 use Exporter qw(import);
 
@@ -38,7 +38,7 @@ sub _coerce_to_lens {
     my ($maybe_lens) = @_;
     eval { $maybe_lens->isa("Data::Focus::Lens") }
         ? $maybe_lens
-        : Data::Focus::Lens::HashArrayIndex->new(key => $maybe_lens);  ## default lens (for now)
+        : Data::Focus::Lens::HashArray::Index->new(key => $maybe_lens);  ## default lens (for now)
 }
 
 sub into {
