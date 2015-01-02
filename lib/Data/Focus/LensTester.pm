@@ -110,13 +110,14 @@ sub _test_get_set {
     };
 }
 
-foreach my $method (qw(set_set set_get get_set)) {
+foreach my $method_base (qw(set_set set_get get_set)) {
     no strict "refs";
-    *{$method} = sub {
+    my $method_impl = "_test_$method_base";
+    *{"test_$method_base"} = sub {
         my ($self, %args) = @_;
         my @args = _get_args(%args);
         $self->_test_focal_points(@args);
-        $self->$method(@args);
+        $self->$method_impl(@args);
     };
 }
 
