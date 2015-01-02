@@ -1,6 +1,7 @@
 use strict;
 use warnings FATAL => "all";
 use Test::More;
+use Test::Identity;
 use Data::Focus qw(focus);
 use Data::Focus::Lens::HashArray::Index;
 use lib "t";
@@ -38,6 +39,8 @@ my %targets = (
     undef => sub { undef },
 );
 
+note("--- get() / list()");
+
 foreach my $case (
     {target => "hash", key => "foo", exp_g => "bar", exp_l => ["bar"]},
     {target => "hash", key => "undef", exp_g => undef, exp_l => [undef]},
@@ -68,6 +71,21 @@ foreach my $case (
         my @got_l = focus($target)->list($lens);
         is_deeply \@got_l, $case->{exp_l}, "list()";
         is_deeply $target, $gen->(), "target is not modified by getters";
+    };
+}
+
+note("--- set()");
+
+foreach my $case (
+    {target => "hash", key => "aa", val => 10, exp => {foo => "bar", undef => undef, aa => 10}},
+) {
+    my $label = make_label($case->{target}, $case->{key});
+    subtest $label => sub {
+        my $target = $targets{$case->{target}}->();
+        my $lens = lens($case->{key});
+        my $got = focus($target)->set($lens, $case->{val});
+        is_deeply $got, $case->{exp}, "set()";
+        identical $got, $target, "destructive update";
     };
 }
 
