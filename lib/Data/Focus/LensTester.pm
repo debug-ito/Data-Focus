@@ -18,7 +18,7 @@ sub new {
     return $self;
 }
 
-sub test_lens {
+sub test_lens_laws {
     my ($self, %args) = @_;
     my $lens = $args{lens};
     croak "lens must be Data::Focus::Lens object" if !eval { $lens->isa("Data::Focus::Lens") };
@@ -115,7 +115,7 @@ TODO: write this.
 
 =head1 DESCRIPTION
 
-L<Data::Focus::LensTester> tests common properties for all lenses called "lens laws".
+L<Data::Focus::LensTester> tests some common properties for lenses. They are called the "lens laws".
 
 Concepturally, the lens laws are described as follows.
 
@@ -139,7 +139,7 @@ L<Data::Focus::LensTester> tests these laws with given set of C<$part>s.
 
 =head2 Tests and Focal Points
 
-Depending on how many focal points the lens creates on the target, L<Data::Focus::LensTester> decides which of the laws to be tested.
+Depending on how many focal points the lens creates on the target, C<test_lens_laws()> method tests the following laws.
 
 =over
 
@@ -197,9 +197,9 @@ List of "part" data used for testing. At least two parts are necessary.
 
 =head1 OBJECT METHODS
 
-=head2 $tester->test_lens(%args)
+=head2 $tester->test_lens_laws(%args)
 
-Test a L<Data::Focus::Lens> object to see if it follows the lens law.
+Test a L<Data::Focus::Lens> object to see if it follows the lens law. See L</Tests and Focal Points>.
 
 Fields in C<%args> are:
 

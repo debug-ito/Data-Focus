@@ -63,7 +63,7 @@ foreach my $case (@cases) {
     );
     my $exp_mutate = defined($case->{exp_mutate}) ? $case->{exp_mutate} : 1;
     subtest "$case->{target}, $case->{key}" => sub {
-        $tester->test_lens(
+        $tester->test_lens_laws(
             lens => $lens, target => $targets{$case->{target}},
             exp_focal_points => $case->{exp_focal_points},
             exp_mutate => $exp_mutate,
