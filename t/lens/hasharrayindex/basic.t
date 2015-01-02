@@ -117,4 +117,22 @@ foreach my $case (
     };
 }
 
+note("--- set() with autovivification");
+
+foreach my $case (
+    {key => "str", val => 10, exp => {str => 10}},
+    {key => 3, val => 5, exp => [undef, undef, undef, 5]},
+    {key => ["a", 4, "b"], val => "x", exp => {a => "x", 4 => "x", b => "x"}},
+    {key => -3, val => "x", exp => {-3 => "x"}},
+    {key => [4, 3, 4, 0], val => "x", exp => ["x", undef, undef, "x", "x"]},
+    {key => "+1", val => "x", exp => {"+1" => "x"}},
+) {
+    my $label = make_label("undef", $case->{key});
+    subtest $label => sub {
+        my $lens = lens($case->{key});
+        my $got = focus(undef)->set($lens, $case->{val});
+        is_deeply $got, $case->{exp};
+    };
+}
+
 done_testing;
