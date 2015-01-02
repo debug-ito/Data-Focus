@@ -25,59 +25,57 @@ sub new {
     return $self;
 }
 
-{
-    my $getter = sub {
-        my ($self, $whole) = @_;
-        my $type = ref($whole);
-        if(!defined($whole)) {
-            ## slots for autovivification
-            return map { undef } @{$self->{keys}};
-        }elsif($type eq "ARRAY") {
-            my @indices = map { int($_) } @{$self->{keys}};
-            return @{$whole}[@indices];
-        }elsif($type eq "HASH") {
-            return @{$whole}{@{$self->{keys}}};
-        }else {
-            ## no slot. cannot set.
-            return ();
-        }
-    };
-    
-    my $setter = sub {
-        my ($self, $whole, @parts) = @_;
-        if(!defined($whole)) {
-            ## autovivifying
-            if(grep { $_ !~ /^\d+$/ } @{$self->{keys}}) {
-                return +{ map { $self->{keys}[$_] => $parts[$_] } 0 .. $#{$self->{keys}} };
-            }else {
-                my $ret = [];
-                $ret->[$self->{keys}[$_]] = $parts[$_] foreach 0 .. $#{$self->{keys}};
-                return $ret;
-            }
-        }
-        my $type = ref($whole);
-        if($type eq "ARRAY") {
-            my @indices = map { int($_) } @{$self->{keys}};
-            $whole->[$indices[$_]] = $parts[$_] foreach 0 .. $#indices; ## destructive
-            return $whole;
-        }elsif($type eq "HASH") {
-            $whole->{$self->{keys}[$_]} = $parts[$_] foreach 0 .. $#{$self->{keys}}; ## destructive
-            return $whole;
-        }else {
-            confess "This should not be executed because the getter should return an empty list.";
-        }
-    };
-
-    sub apply {
-        my ($self, $part_mapper, $applicative_class) = @_;
-        return sub {
-            my ($whole) = @_;
-            my @parts = $self->$getter($whole);
-            return $applicative_class->build_result(sub {
-                $self->$setter(@_)
-            }, $whole, map { $part_mapper->($_) } @parts);
-        };
+sub _getter {
+    my ($self, $whole) = @_;
+    my $type = ref($whole);
+    if(!defined($whole)) {
+        ## slots for autovivification
+        return map { undef } @{$self->{keys}};
+    }elsif($type eq "ARRAY") {
+        my @indices = map { int($_) } @{$self->{keys}};
+        return @{$whole}[@indices];
+    }elsif($type eq "HASH") {
+        return @{$whole}{@{$self->{keys}}};
+    }else {
+        ## no slot. cannot set.
+        return ();
     }
+}
+    
+sub _setter {
+    my ($self, $whole, @parts) = @_;
+    if(!defined($whole)) {
+        ## autovivifying
+        if(grep { $_ !~ /^\d+$/ } @{$self->{keys}}) {
+            return +{ map { $self->{keys}[$_] => $parts[$_] } 0 .. $#{$self->{keys}} };
+        }else {
+            my $ret = [];
+            $ret->[$self->{keys}[$_]] = $parts[$_] foreach 0 .. $#{$self->{keys}};
+            return $ret;
+        }
+    }
+    my $type = ref($whole);
+    if($type eq "ARRAY") {
+        my @indices = map { int($_) } @{$self->{keys}};
+        $whole->[$indices[$_]] = $parts[$_] foreach 0 .. $#indices; ## destructive
+        return $whole;
+    }elsif($type eq "HASH") {
+        $whole->{$self->{keys}[$_]} = $parts[$_] foreach 0 .. $#{$self->{keys}}; ## destructive
+        return $whole;
+    }else {
+        confess "This should not be executed because the getter should return an empty list.";
+    }
+}
+
+sub apply {
+    my ($self, $part_mapper, $applicative_class) = @_;
+    return sub {
+        my ($whole) = @_;
+        my @parts = $self->_getter($whole);
+        return $applicative_class->build_result(sub {
+            $self->_setter(@_)
+        }, $whole, map { $part_mapper->($_) } @parts);
+    };
 }
 
 1;
