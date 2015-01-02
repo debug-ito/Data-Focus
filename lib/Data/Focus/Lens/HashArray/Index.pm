@@ -46,11 +46,6 @@ sub new {
     my $setter = sub {
         my ($self, $whole, @parts) = @_;
         if(!defined($whole)) {
-            if(!grep { defined($_) } @parts) {
-                ## If the written parts are all undef, it won't autovivify.
-                ## This is necessary to meet "get-set" law.
-                return undef;
-            }
             ## autovivifying
             if(grep { $_ !~ /^\d+$/ } @{$self->{keys}}) {
                 return +{ map { $self->{keys}[$_] => $parts[$_] } 0 .. $#{$self->{keys}} };
