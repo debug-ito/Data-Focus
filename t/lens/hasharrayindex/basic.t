@@ -78,6 +78,32 @@ note("--- set()");
 
 foreach my $case (
     {target => "hash", key => "aa", val => 10, exp => {foo => "bar", undef => undef, aa => 10}},
+    {target => "hash", key => "non-existent", val => "aaa",
+     exp => {foo => "bar", undef => undef, aa => [0,1,2], "non-existent" => "aaa"}},
+    {target => "hash", key => [0, 5, "aa"], val => 18,
+     exp => {foo => "bar", undef => undef, aa => 18, 0 => 18, 5 => 18}},
+    {target => "hash", key => ["foo", "foo", "foo"], val => 0,
+     exp => {foo => 0, undef => undef, aa => [0,1,2]}},
+    {target => "array", key => 4, val => [],
+     exp => [20, undef, "AAA", "bb", []]},
+    {target => "array", key => 6, val => "foo",
+     exp => [20, undef, "AAA", "bb", {hoge => "HOGE"}, undef, "foo"]},
+    {target => "array", key => -3, val => "aaa",
+     exp => [20, undef, "aaa", "bb", {hoge => "HOGE"}]},
+    {target => "array", key => [0, 2, 4], val => 80,
+     exp => [80, undef, 80, "bb", 80]},
+    {target => "array", key => [3, 7, 5], val => "xx",
+     exp => [20, undef, "AAA", "xx", {hoge => "HOGE"}, "xx", undef, "xx"]},
+    {target => "array", key => [-2, -1, -2, -1], val => "xx",
+     exp => [20, undef, "AAA", "xx", "xx"]},
+
+    ## negative index and positive out-of-range index. It expands the array for each key.
+    {target => "array", key => [7, -2, 10, -2], val => "xx",
+     exp => [20, undef, "AAA", "bb", {hoge => "HOGE"}, undef, "xx", "xx", undef, "xx", "xx"]},
+
+    {target => "scalar", key => "hoge", val => "XXX", exp => "aaa"},
+    {target => "scalar_ref", key => "hoge", val => "XXX", exp => \(999)},
+    {target => "obj", key => "hoge", val => "XXX", exp => testlib::SampleObject->new()},
 ) {
     my $label = make_label($case->{target}, $case->{key});
     subtest $label => sub {
@@ -85,7 +111,9 @@ foreach my $case (
         my $lens = lens($case->{key});
         my $got = focus($target)->set($lens, $case->{val});
         is_deeply $got, $case->{exp}, "set()";
-        identical $got, $target, "destructive update";
+        if(ref($target)) {
+            identical $got, $target, "destructive update";
+        }
     };
 }
 
