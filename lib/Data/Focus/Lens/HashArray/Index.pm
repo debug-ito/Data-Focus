@@ -57,7 +57,11 @@ sub _setter {
     my $type = ref($whole);
     if($type eq "ARRAY") {
         my @indices = map { int($_) } @{$self->{keys}};
-        $whole->[$indices[$_]] = $parts[$_] foreach 0 .. $#indices; ## destructive
+        foreach my $i (0 .. $#indices) {
+            my $index = $indices[$i];
+            croak "$index: negative out-of-range index" if $index < -(@$whole);
+            $whole->[$index] = $parts[$i];  ## destructive
+        }
         return $whole;
     }elsif($type eq "HASH") {
         $whole->{$self->{keys}[$_]} = $parts[$_] foreach 0 .. $#{$self->{keys}}; ## destructive

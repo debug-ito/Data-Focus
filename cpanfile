@@ -7,6 +7,7 @@ requires "Scalar::Util";
 on 'test' => sub {
     requires 'Test::More' => "0";
     requires 'Test::Identity';
+    requires 'Test::Fatal';
     requires 'Exporter';
 };
 
