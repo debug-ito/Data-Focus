@@ -20,6 +20,22 @@ sub new {
 
 sub test_lens_laws {
     my ($self, %args) = @_;
+    my @args = _get_args(%args);
+    my $exp_focal_points = $args[2];
+    $self->_test_focal_points(@args);
+    $self->_test_set_set(@args);
+    if($exp_focal_points == 0) {
+        $self->_test_get_set(@args);
+    }elsif($exp_focal_points == 1) {
+        $self->_test_get_set(@args);
+        $self->_test_set_get(@args);
+    }else {
+        $self->_test_set_get(@args);
+    }
+}
+
+sub _get_args {
+    my (%args) = @_;
     my $lens = $args{lens};
     croak "lens must be Data::Focus::Lens object" if !eval { $lens->isa("Data::Focus::Lens") };
     my $target = $args{target};
@@ -27,21 +43,15 @@ sub test_lens_laws {
     my $exp_focal_points = $args{exp_focal_points};
     croak "exp_focal_points must be Int" if !defined($exp_focal_points) || $exp_focal_points !~ /^\d+$/;
     my $exp_mutate = $args{exp_mutate};
+    return ($target, $lens, $exp_focal_points, $exp_mutate);
+}
 
+sub _test_focal_points {
+    my ($self, $target, $lens, $exp_focal_points) = @_;
     subtest "focal points" => sub {
         my @ret = focus($target->())->list($lens);
         is scalar(@ret), $exp_focal_points, "list() returns $exp_focal_points focal points";
     };
-
-    $self->_test_set_set($target, $lens, $exp_focal_points, $exp_mutate);
-    if($exp_focal_points == 0) {
-        $self->_test_get_set($target, $lens, $exp_focal_points, $exp_mutate);
-    }elsif($exp_focal_points == 1) {
-        $self->_test_get_set($target, $lens, $exp_focal_points, $exp_mutate);
-        $self->_test_set_get($target, $lens, $exp_focal_points, $exp_mutate);
-    }else {
-        $self->_test_set_get($target, $lens, $exp_focal_points, $exp_mutate);
-    }
 }
 
 sub _test_set_set {
@@ -100,6 +110,16 @@ sub _test_get_set {
     };
 }
 
+foreach my $method (qw(set_set set_get get_set)) {
+    no strict "refs";
+    *{$method} = sub {
+        my ($self, %args) = @_;
+        my @args = _get_args(%args);
+        $self->_test_focal_points(@args);
+        $self->$method(@args);
+    };
+}
+
 1;
 __END__
 
@@ -125,13 +145,19 @@ Concepturally, the lens laws are described as follows.
 
     focus( focus($target)->set($lens, $part) )->get($lens) == $part
 
+You get the exact C<$part> you just set.
+
 =item get-set law
 
     focus($target)->set( $lens, focus($target)->get($lens) ) == $target
 
+If you put back the part you just got out of the C<$target>, it changes nothing.
+
 =item set-set law
 
     focus( focus($target)->set($lens, $part1) )->set($lens, $part2) == focus($target)->set($lens, $part2)
+
+The C<$lens>'s focal point is consistent, so C<$part1> is overwritten by C<$part2>.
 
 =back
 
@@ -158,6 +184,29 @@ It tests "set-get" and "set-set" laws.
 In "set-get" law, the C<set()> method should set all focal points to the same value.
 
 =back
+
+=head2 Exception
+
+Not all lenses meet all the lens laws.
+
+Consider the following code for example.
+
+    use strict;
+    use warnings;
+    use Data::Dumper;
+    
+    my $undef;
+    $undef->[0] = $undef->[0];
+    print Dumper $undef;
+    
+    ## => $VAR1 = [
+    ## =>           undef
+    ## =>         ];
+
+If we think of C<< ->[0] >> as a lens, the above example clearly breaks the "get-set" law because of autovivification.
+
+If you expect that kind of behavior, do not use C<test_lens_laws()> method.
+Use C<test_set_get()> etc instead.
 
 =head1 CLASS METHODS
 
@@ -232,6 +281,14 @@ The setter methods should return a different instance from the target.
 If not specified, the mutation check is not performed.
 
 =back
+
+=head2 $tester->test_set_get(%args)
+
+=head2 $tester->test_get_set(%args)
+
+=head2 $tester->test_set_set(%args)
+
+Test individual lens laws. C<%args> are the same as C<test_lens_laws()> method.
 
 =head1 AUTHOR
  
