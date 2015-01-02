@@ -139,10 +139,8 @@ If different values are set to those indices, only the last one takes effect.
 
 When reading, it always returns C<undef>.
 
-When writing, it autovivifies if the written value is defined. It does not autovivify if the written value is C<undef>.
-
-When autovivifying, it creates  an array-ref if and only if the keys are all non-negative integers.
-Otherwise, it creates a hash-ref.
+When writing, it autovivifies an array-ref if and only if the keys are all non-negative integers.
+Otherwise, it autovivifies a hash-ref.
 
 =head2 other targets
 
