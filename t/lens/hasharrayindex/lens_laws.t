@@ -59,17 +59,20 @@ foreach my $case (
     {target => "obj", key => "bar", exp_focal_points => 0},
 
 ) {
-    my $lens = Data::Focus::Lens::HashArray::Index->new(
-        key => $case->{key},
-    );
-    my $keys = ref($case->{key}) ? join(",", @{$case->{key}}) : $case->{key};
-    subtest "$case->{target}, $keys" => sub {
-        $tester->test_lens_laws(
-            lens => $lens, target => $targets{$case->{target}},
-            exp_focal_points => $case->{exp_focal_points},
-            exp_mutate => 1,
+    foreach my $immutable (0, 1) {
+        my $lens = Data::Focus::Lens::HashArray::Index->new(
+            key => $case->{key}, immutable => $immutable
         );
-    };
+        my $keys = ref($case->{key}) ? join(",", @{$case->{key}}) : $case->{key};
+        my $imm_str = $immutable ? "immutable" : "mutable";
+        subtest "$case->{target}, $keys ($imm_str)" => sub {
+            $tester->test_lens_laws(
+                lens => $lens, target => $targets{$case->{target}},
+                exp_focal_points => $case->{exp_focal_points},
+                exp_mutate => !$immutable,
+            );
+        };
+    }
 }
 
 note("--- undef target. autovivification breaks get-set law");

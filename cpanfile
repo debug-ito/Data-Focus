@@ -9,6 +9,7 @@ on 'test' => sub {
     requires 'Test::Identity';
     requires 'Test::Fatal';
     requires 'Exporter';
+    requires "Scalar::Util";
 };
 
 on 'configure' => sub {
