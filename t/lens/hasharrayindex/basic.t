@@ -105,9 +105,9 @@ foreach my $case (
     {target => "array", key => [7, -2, 10, -2], val => "xx",
      exp => [20, undef, "AAA", "bb", {hoge => "HOGE"}, undef, "xx", "xx", undef, "xx", "xx"]},
 
-    {target => "scalar", key => "hoge", val => "XXX", exp => "aaa", exp_immutable => 1},
-    {target => "scalar_ref", key => "hoge", val => "XXX", exp => \(999), exp_immutable => 1},
-    {target => "obj", key => "hoge", val => "XXX", exp => testlib::SampleObject->new(), exp_immutable => 1},
+    {target => "scalar", key => "hoge", val => "XXX", exp => "aaa"},
+    {target => "scalar_ref", key => "hoge", val => "XXX", exp => \(999), exp_same_instance => 1},
+    {target => "obj", key => "hoge", val => "XXX", exp => testlib::SampleObject->new(), exp_same_instance => 1},
 ) {
     foreach my $immutable (0, 1) {
         my $label = make_label($case->{target}, $case->{key}, $immutable);
@@ -118,7 +118,9 @@ foreach my $case (
             my $got = focus($target)->set($lens, $case->{val});
             is_deeply $got, $case->{exp}, "set()";
             if(ref($target)) {
-                if($case->{exp_immutable} || $immutable) {
+                if($case->{exp_same_instance}) {
+                    identical $got, $target, "it returns the same instance, not modified";
+                }elsif($immutable) {
                     isnt refaddr($got), refaddr($target), "non-destructive update";
                     is_deeply $target, $gen->(), "target is preserved";
                 }else {
