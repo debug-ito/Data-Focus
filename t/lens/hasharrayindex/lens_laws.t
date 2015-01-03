@@ -6,6 +6,13 @@ use Data::Focus::Lens::HashArray::Index;
 use lib "t";
 use testlib::SampleObject;
 
+sub make_label {
+    my ($target, $key, $immutable) = @_;
+    my $keys = ref($key) ? join(":", @$key) : $key;
+    my $imm_str = $immutable ? "immutable" : "mutable";
+    return "$target, $keys ($imm_str)";
+}
+
 my $tester = Data::Focus::LensTester->new(
     test_whole => sub {
         is_deeply(@_);
@@ -45,27 +52,23 @@ foreach my $case (
     {target => "hash", key => "foo", exp_focal_points => 1},
     {target => "hash", key => "undef", exp_focal_points => 1},
     {target => "hash", key => "aa", exp_focal_points => 1},
-    {target => "hash", key => "non-existent", exp_focal_points => 1},
     {target => "hash", key => ["foo", "undef", "non-existent"], exp_focal_points => 3},
     {target => "hash", key => ["foo", "foo", "foo", "foo"], exp_focal_points => 4},
     {target => "array", key => 0, exp_focal_points => 1},
     {target => "array", key => 1, exp_focal_points => 1},
     {target => "array", key => 2.5, exp_focal_points => 1}, ## cast to int. without warning.
     {target => "array", key => -3, exp_focal_points => 1}, ## in-range negative index. writable.
-    {target => "array", key => 20, exp_focal_points => 1}, ## out-of-range positive index. writable.
     {target => "array", key => [1, 10, 0], exp_focal_points => 3},
     {target => "array", key => [2,2,2,2], exp_focal_points => 4},
     {target => "scalar_ref", key => "foo", exp_focal_points => 0},
     {target => "obj", key => "bar", exp_focal_points => 0},
-
 ) {
     foreach my $immutable (0, 1) {
         my $lens = Data::Focus::Lens::HashArray::Index->new(
             key => $case->{key}, immutable => $immutable
         );
-        my $keys = ref($case->{key}) ? join(",", @{$case->{key}}) : $case->{key};
-        my $imm_str = $immutable ? "immutable" : "mutable";
-        subtest "$case->{target}, $keys ($imm_str)" => sub {
+        my $label = make_label($case->{target}, $case->{key}, $immutable);
+        subtest $label => sub {
             $tester->test_lens_laws(
                 lens => $lens, target => $targets{$case->{target}},
                 exp_focal_points => $case->{exp_focal_points},
@@ -75,7 +78,7 @@ foreach my $case (
     }
 }
 
-note("--- undef target. autovivification breaks get-set law");
+note("--- cases where get-set law breaks because of autovivification and auto-expansion");
 foreach my $case (
     {target => "undef", key => "str", exp_focal_points => 1},
     {target => "undef", key => 5, exp_focal_points => 1},
@@ -83,20 +86,24 @@ foreach my $case (
     {target => "undef", key => [0, 3, 7], exp_focal_points => 3},
     {target => "undef", key => ["a", "a", "a"], exp_focal_points => 3},
     {target => "undef", key => [1,1,1], exp_focal_points => 3},
+    {target => "hash", key => "non-existent", exp_focal_points => 1},
+    {target => "array", key => 20, exp_focal_points => 1}, ## out-of-range positive index. writable.
 ) {
-   my $lens = Data::Focus::Lens::HashArray::Index->new(
-       key => $case->{key}
-   );
-   my %test_args = (
-       lens => $lens, target => $targets{$case->{target}},
-       exp_focal_points => $case->{exp_focal_points},
-       exp_mutate => 0 ## autovivification
-   );
-   my $keys = ref($case->{key}) ? join(",", @{$case->{key}}) : $case->{key};
-   subtest "$case->{target}, $keys" => sub {
-       $tester->test_set_set(%test_args);
-       $tester->test_set_get(%test_args);
-   };
+    foreach my $immutable (0, 1) {
+        my $lens = Data::Focus::Lens::HashArray::Index->new(
+            key => $case->{key}, immutable => $immutable
+        );
+        my $label = make_label($case->{target}, $case->{key}, $immutable);
+        my %test_args = (
+            lens => $lens, target => $targets{$case->{target}},
+            exp_focal_points => $case->{exp_focal_points},
+            exp_mutate => ($case->{target} eq "undef" ? 0 : !$immutable)
+        );
+        subtest $label => sub {
+            $tester->test_set_set(%test_args);
+            $tester->test_set_get(%test_args);
+        };
+    }
 }
 
 done_testing;
