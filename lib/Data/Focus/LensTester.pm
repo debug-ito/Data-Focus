@@ -104,7 +104,7 @@ sub _test_get_set {
         foreach my $part (@{$self->{parts}}) {
             my $left_target = $target->();
             my $left_result = focus($left_target)->set($lens, focus($left_target)->get($lens));
-            $self->{test_whole}->($left_result, $left_target);
+            $self->{test_whole}->($left_result, $target->());
             _check_mutate("get_set", $left_target, $left_result, $exp_mutate, $exp_focal_points);
         }
     };
