@@ -57,15 +57,17 @@ sub _setter {
     my $type = ref($whole);
     if($type eq "ARRAY") {
         my @indices = map { int($_) } @{$self->{keys}};
+        my $ret = $self->{immutable} ? [@$whole] : $whole;
         foreach my $i (0 .. $#indices) {
             my $index = $indices[$i];
-            croak "$index: negative out-of-range index" if $index < -(@$whole);
-            $whole->[$index] = $parts[$i];  ## destructive
+            croak "$index: negative out-of-range index" if $index < -(@$ret);
+            $ret->[$index] = $parts[$i];
         }
-        return $whole;
+        return $ret;
     }elsif($type eq "HASH") {
-        $whole->{$self->{keys}[$_]} = $parts[$_] foreach 0 .. $#{$self->{keys}}; ## destructive
-        return $whole;
+        my $ret = $self->{immutable} ? {%$whole} : $whole;
+        $ret->{$self->{keys}[$_]} = $parts[$_] foreach 0 .. $#{$self->{keys}};
+        return $ret;
     }else {
         confess "This should not be executed because the getter should return an empty list.";
     }
