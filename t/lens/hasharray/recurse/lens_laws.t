@@ -1,0 +1,50 @@
+use strict;
+use warnings FATAL => "all";
+use Test::More;
+use Data::Focus qw(focus);
+use Data::Focus::Lens::HashArray::Recurse;
+use Data::Focus::LensTester;
+use lib "t";
+use testlib::SampleObject;
+
+my $tester = Data::Focus::LensTester->new(
+    test_whole => sub { is_deeply($_[0], $_[1]) },
+    test_part => sub { is_deeply($_[0], $_[1]) },
+    parts => [
+        undef, 1, "str", [], {},
+    ]
+);
+
+my %targets = (
+    scalar => sub { "aaa" },
+    scalar_ref => sub { \(100) },
+    obj => sub { testlib::SampleObject->new },
+    undef => sub { undef },
+    
+    empty_hash => sub { +{} },
+    hash => sub { +{foo => "bar", fizz => "buzz"} },
+
+    empty_array => sub { +[] },
+    array => sub { +[0, 1, 2, 3] },
+
+    nested => sub { +{foo => [0, {bar => "buzz"}, [], 11], hoge => {FOO => [9, {}]}} },
+);
+
+foreach my $case (
+    {target => "scalar", exp_focal_points => 0},
+) {
+    foreach my $immutable (0, 1) {
+        my $lens = Data::Focus::Lens::HashArray::Recurse->new(immutable => $immutable);
+        my $label = "$case->{target}, immutable=$immutable";
+        my %test_args = (
+            lens => $lens, target => $targets{$case->{target}},
+            exp_focal_points => $case->{exp_focal_points},
+            exp_mutate => !$immutable,
+        );
+        subtest $label => sub {
+            $tester->test_lens_laws(%test_args);
+        };
+    }
+}
+
+done_testing;

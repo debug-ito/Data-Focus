@@ -94,6 +94,10 @@ __END__
 
 Data::Focus::Lens::HashArray::Index - a lens to focus on element(s) of hash/array
 
+=head1 SYNOPSIS
+
+TODO.
+
 =head1 DESCRIPTION
 
 This is an implementation of L<Data::Focus::Lens>,
