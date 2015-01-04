@@ -177,10 +177,6 @@ This means every updating operation using the C<$lens> creates a new hash/array 
 
 See L<Data::Focus::Lens>.
 
-=head1 TODO
-
-Maybe we could use less featured and faster version of this, like Data::Focus::Lens::HashArray::Index::Lite.
-
 =head1 AUTHOR
  
 Toshio Ito, C<< <toshioito at cpan.org> >>

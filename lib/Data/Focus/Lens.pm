@@ -13,11 +13,11 @@ Data::Focus::Lens - base class for lenses
 
 =head1 DESCRIPTION
 
-B<< Internal use only (for now) >>
-
 L<Data::Focus::Lens> is the base class for all lenses in L<Data::Focus> framework.
 
 =head1 ABSTRACT OBJECT METHODS
+
+B<< This interface is experimental for now. You should not implement them by hand. >>
 
 All lens implementations must implement the following methods.
 
@@ -43,6 +43,7 @@ Object methods implemented by this class. You should not override them.
 =head2 $composite_lens = $lens->compose(@other_lenses)
 
 Compose the C<$lens> with one or more C<@other_lenses> to produce the C<$composite_lens>.
+C<$composite_lens> is a L<Data::Focus::Lens::Composite> object.
 
 =head1 OVERLOADS
 
