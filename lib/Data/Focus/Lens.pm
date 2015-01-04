@@ -2,6 +2,12 @@ package Data::Focus::Lens;
 use strict;
 use warnings;
 
+sub compose {
+    my ($self, @lenses) = @_;
+    require Data::Focus::Lens::Composite;
+    return Data::Focus::Lens::Composite->new($self, @lenses);
+}
+
 1;
 __END__
 

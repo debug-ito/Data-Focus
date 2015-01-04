@@ -2,6 +2,7 @@ package Data::Focus;
 use strict;
 use warnings;
 use Data::Focus::Lens::HashArray::Index;
+use Data::Focus::Util;
 use Carp;
 use Exporter qw(import);
 
@@ -53,11 +54,7 @@ sub into {
 sub _create_whole_mapper {
     my ($self, $app_class, $updater, @additional_lenses) = @_;
     my @lenses = (@{$self->{lenses}}, map { _coerce_to_lens($_) } @additional_lenses);
-    my $part_mapper = $app_class->create_part_mapper($updater);
-    while(defined(my $lens = pop @lenses)) {
-        $part_mapper = $lens->apply($part_mapper, $app_class);
-    }
-    return $part_mapper;
+    return Data::Focus::Util::create_whole_mapper($app_class, $app_class->create_part_mapper($updater), @lenses);
 }
 
 sub get {

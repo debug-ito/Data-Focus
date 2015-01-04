@@ -1,6 +1,18 @@
 package Data::Focus::Lens::Composite;
 use strict;
 use warnings;
+use parent qw(Data::Focus::Lens);
+use Data::Focus::Util;
+
+sub new {
+    my ($class, @lenses) = @_;
+    return bless \@lenses, $class;
+}
+
+sub apply {
+    my ($self, $part_mapper, $applicative_class) = @_;
+    return Data::Focus::Util::create_whole_mapper($applicative_class, $part_mapper, @$self);
+}
 
 
 1;
