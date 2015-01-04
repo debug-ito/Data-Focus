@@ -11,7 +11,8 @@ my $tester = Data::Focus::LensTester->new(
     test_whole => sub { is_deeply($_[0], $_[1]) },
     test_part => sub { is_deeply($_[0], $_[1]) },
     parts => [
-        undef, 1, "str", [], {},
+        undef, 1, "str", \(100), testlib::SampleObject->new,
+        ## [], {}, # if we mix hash/array, set-set law breaks.
     ]
 );
 
@@ -31,7 +32,7 @@ my %targets = (
 );
 
 foreach my $case (
-    {target => "scalar", exp_focal_points => 0},
+    {target => "scalar", exp_focal_points => 1, exp_mutate => undef},
 ) {
     foreach my $immutable (0, 1) {
         my $lens = Data::Focus::Lens::HashArray::Recurse->new(immutable => $immutable);
@@ -39,7 +40,7 @@ foreach my $case (
         my %test_args = (
             lens => $lens, target => $targets{$case->{target}},
             exp_focal_points => $case->{exp_focal_points},
-            exp_mutate => !$immutable,
+            exp_mutate => exists($case->{exp_mutate}) ? $case->{exp_mutate} : !$immutable,
         );
         subtest $label => sub {
             $tester->test_lens_laws(%test_args);
