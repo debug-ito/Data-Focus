@@ -1,6 +1,57 @@
-package Data::Focus::HashArray::Recurse;
+package Data::Focus::Lens::HashArray::Recurse;
 use strict;
 use warnings;
+use parent qw(Data::Focus::Lens);
+use Sub::Recursive qw(recursive $REC);
+
+sub new {
+    my ($class, %args) = @_;
+    my $self = bless {
+        immutable => !!$args{immutable}
+    }, $class;
+    return $self;
+}
+
+sub _set_array {
+    my ($self, $whole, @parts) = @_;
+    if($self->{immutable}) {
+        return \@parts;
+    }else {
+        @$whole = @parts;
+        return $whole;
+    }
+}
+
+sub _set_hash {
+    my ($self, $whole, $keys, @parts) = @_;
+    my $ret = $self->{immutable} ? {%$whole} : $whole;
+    $ret->{$keys->[$_]} = $parts[$_] foreach 0 .. $#$keys;
+    return $ret;
+}
+
+sub apply {
+    my ($self, $part_mapper, $app_class) = @_;
+    return recursive {
+        my ($data) = @_;
+        my $type = ref($data);
+        if($type eq "ARRAY") {
+            my @fparts = map { $REC->($_) } @$data;
+            return $app_class->build_result(sub {
+                my $data = shift;
+                return $self->_set_array($data, @_);
+            }, $data, @fparts);
+        }elsif($type eq "HASH") {
+            my @keys = keys %$data;
+            my @fparts = map { $REC->($_) } @{$data}{@keys};
+            return $app_class->build_result(sub {
+                my $data = shift;
+                return $self->_set_hash($data, \@keys, @_);
+            }, $data, @fparts);
+        }else {
+            return $part_mapper->($data);
+        }
+    };
+}
 
 1;
 __END__
@@ -9,7 +60,7 @@ __END__
 
 =head1 NAME
 
-Data::Focus::HashArray::Recurse - recursively traverse hash/array
+Data::Focus::Lens::HashArray::Recurse - recursively traverse hash/array
 
 =head1 SYNOPSIS
 

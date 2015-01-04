@@ -47,4 +47,6 @@ foreach my $case (
     }
 }
 
+fail("other cases");
+
 done_testing;

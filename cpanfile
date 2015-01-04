@@ -4,6 +4,7 @@ requires "Carp";
 requires "Exporter";
 requires "Scalar::Util";
 requires "overload";
+requires "Sub::Recursive" => "0.03";
 
 on 'test' => sub {
     requires 'Test::More' => "0";
