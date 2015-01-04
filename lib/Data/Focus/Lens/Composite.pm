@@ -2,6 +2,7 @@ package Data::Focus::Lens::Composite;
 use strict;
 use warnings;
 
+
 1;
 __END__
 
@@ -42,6 +43,8 @@ L<Data::Focus::Lens::Composite> is a L<Data::Focus::Lens> class that is composed
 Compose C<@lenses> to create a C<$composite> lens.
 
 C<@lenses> are composed in the same order as you pass them to C<into()>, C<get()> etc methods of L<Data::Focus>.
+
+If C<@lenses> is empty, it returns a no-op lens.
 
 =head1 OBJECT METHODS
 

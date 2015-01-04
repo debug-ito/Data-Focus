@@ -63,4 +63,11 @@ my $lens3 = lens("bar");
     is focus($target)->get($com2), "buzz";
 }
 
+{
+    note("--- empty composite lens");
+    my $lens = Data::Focus::Lens::Composite->new();
+    isa_ok $lens, "Data::Focus::Lens::Composite";
+    is_deeply focus($target)->get($lens), {foo => [{bar => "buzz"}]}, "empty composite lens is Identity lens";
+}
+
 done_testing;
