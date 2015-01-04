@@ -33,6 +33,14 @@ my %targets = (
 
 foreach my $case (
     {target => "scalar", exp_focal_points => 1, exp_mutate => undef},
+    {target => "scalar_ref", exp_focal_points => 1, exp_mutate => undef},
+    {target => "obj", exp_focal_points => 1, exp_mutate => undef},
+    {target => "undef", exp_focal_points => 1, exp_mutate => undef},
+    {target => "empty_hash", exp_focal_points => 0},
+    {target => "hash", exp_focal_points => 2},
+    {target => "empty_array", exp_focal_points => 0},
+    {target => "array", exp_focal_points => 4},
+    {target => "nested", exp_focal_points => 4},
 ) {
     foreach my $immutable (0, 1) {
         my $lens = Data::Focus::Lens::HashArray::Recurse->new(immutable => $immutable);
@@ -47,7 +55,5 @@ foreach my $case (
         };
     }
 }
-
-fail("other cases");
 
 done_testing;
