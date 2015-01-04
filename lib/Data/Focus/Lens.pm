@@ -1,12 +1,10 @@
 package Data::Focus::Lens;
 use strict;
 use warnings;
-use overload "." => "_dot";
-
-sub _dot {
+use overload "." => sub {
     my ($self, $other, $swap) = @_;
     return $swap ? $other->compose($self) : $self->compose($other);
-}
+};
 
 sub compose {
     my ($self, @lenses) = @_;
