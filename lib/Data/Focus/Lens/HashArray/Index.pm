@@ -2,6 +2,7 @@ package Data::Focus::Lens::HashArray::Index;
 use strict;
 use warnings;
 use parent qw(Data::Focus::Lens);
+use Data::Focus::LensMaker ();
 use Carp;
 
 our @CARP_NOT = qw(Data::Focus::Lens Data::Focus);
@@ -73,16 +74,7 @@ sub _setter {
     }
 }
 
-sub apply {
-    my ($self, $part_mapper, $applicative_class) = @_;
-    return sub {
-        my ($whole) = @_;
-        my @parts = $self->_getter($whole);
-        return $applicative_class->build_result(sub {
-            $self->_setter(@_)
-        }, $whole, map { $part_mapper->($_) } @parts);
-    };
-}
+Data::Focus::LensMaker::make_lens_from_accessors(\&_getter, \&_setter);
 
 1;
 

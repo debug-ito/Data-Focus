@@ -27,7 +27,7 @@ L<Data::Focus::Lens> is the base class for all lenses in L<Data::Focus> framewor
 
 =head1 ABSTRACT OBJECT METHODS
 
-B<< This interface is experimental for now. You should not implement them by hand. >>
+B<< This interface is experimental for now. You should not implement them by hand. Use L<Data::Focus::LensMaker> instead. >>
 
 All lens implementations must implement the following methods.
 
