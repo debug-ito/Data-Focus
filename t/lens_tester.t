@@ -21,7 +21,7 @@ my $lens = Data::Focus::Lens::HashArray::Index->new(
 
 $tester->test_lens_laws(
     lens => $lens, target => $create_target,
-    exp_focal_points => 1, exp_mutate => 1
+    exp_focal_points => 1,
 );
 
 done_testing;

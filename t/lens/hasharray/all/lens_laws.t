@@ -1,10 +1,12 @@
 use strict;
 use warnings FATAL => "all";
 use Test::More;
+use Data::Focus qw(focus);
 use Data::Focus::Lens::HashArray::All;
 use Data::Focus::LensTester;
 use lib "t";
 use testlib::SampleObject;
+use testlib::Identity qw(check_identity);
 
 my $tester = Data::Focus::LensTester->new(
     test_whole => sub { is_deeply($_[0], $_[1]) },
@@ -38,13 +40,21 @@ foreach my $case (
 ) {
     foreach my $immutable (0, 1) {
         my $label = "$case->{target}, immutable=$immutable";
+        my $lens = Data::Focus::Lens::HashArray::All->new(immutable => $immutable);
         subtest $label => sub {
-            my $lens = Data::Focus::Lens::HashArray::All->new(immutable => $immutable);
             $tester->test_lens_laws(
                 target => $targets{$case->{target}}, lens => $lens,
                 exp_focal_points => $case->{exp_focal_points},
-                exp_mutate => !$immutable
+                ## exp_mutate => !$immutable
             );
+        };
+        subtest "$label: set() mutation" => sub {
+            foreach my $part ($tester->parts) {
+                my $target = $targets{$case->{target}}->();
+                my $result = focus($target)->set($lens, $part);
+                check_identity($result, $target,
+                               $case->{exp_focal_points} == 0 ? 1 : !$immutable);
+            }
         };
     }
 }

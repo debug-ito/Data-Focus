@@ -46,8 +46,6 @@ sub _get_args {
     croak "target must be a code-ref" if ref($target) ne "CODE";
     my $exp_focal_points = $args{exp_focal_points};
     croak "exp_focal_points must be Int" if !defined($exp_focal_points) || $exp_focal_points !~ /^\d+$/;
-
-    die "exp_mutate disabled" if exists $args{exp_mutate};
     return ($target, $lens, $exp_focal_points);
 }
 
