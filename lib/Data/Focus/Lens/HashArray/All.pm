@@ -2,6 +2,8 @@ package Data::Focus::Lens::HashArray::All;
 use strict;
 use warnings;
 use parent qw(Data::Focus::Lens);
+use Carp;
+use Data::Focus::LensMaker ();
 
 sub new {
     my ($class, %args) = @_;
@@ -9,6 +11,42 @@ sub new {
         immutable => !!$args{immutable}
     }, $class;
 }
+
+sub _getter {
+    my ($self, $whole) = @_;
+    my $type = ref($whole);
+    if($type eq "ARRAY") {
+        return @$whole;
+    }elsif($type eq "HASH") {
+        my @keys = sort keys %$whole;
+        return @{$whole}{@keys};
+    }else {
+        return ();
+    }
+}
+
+sub _setter {
+    my ($self, $whole, @parts) = @_;
+    my $type = ref($whole);
+    if($type eq "ARRAY") {
+        if($self->{immutable}) {
+            return \@parts;
+        }else {
+            @$whole = @parts;
+            return $whole;
+        }
+    }elsif($type eq "HASH") {
+        my @keys = sort keys %$whole;
+        my $ret = $self->{immutable} ? {%$whole} : $whole;
+        $ret->{$keys[$_]} = $parts[$_] foreach 0 .. $#keys;
+        return $ret;
+    }else {
+        confess "This should not happen because there should be no focal point.";
+    }
+}
+
+Data::Focus::LensMaker::make_lens_from_accessors(\&_getter, \&_setter);
+
 
 1;
 __END__
