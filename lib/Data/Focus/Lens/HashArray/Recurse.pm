@@ -96,6 +96,10 @@ L<Data::Focus::Lens::HashArray::Recurse> is a L<Data::Focus::Lens> class
 that recursively traverses a data structure made of hashes and arrays.
 It creates focal points on everything it finds on the traversal.
 
+The traversal is depth-first.
+Siblings in a hash are traversed in random order.
+Siblings in an array are traversed from the index 0.
+
 =head1 CLASS METHODS
 
 =head2 $lens = Data::Focus::Lens::HashArray::Recurse->new(%args)

@@ -84,6 +84,9 @@ If the hash or array has no element, it creates no focal point.
 
 If the target is not a hash or array, it creates no focal point.
 
+Elements in a hash are traversed in random order.
+Elements in an array are traversed from the index 0.
+
 =head1 CLASS METHODS
 
 =head2 $lens = Data::Focus::Lens::HashArray::All->new(%args)
