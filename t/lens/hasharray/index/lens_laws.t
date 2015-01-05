@@ -1,10 +1,12 @@
 use strict;
 use warnings FATAL => "all";
 use Test::More;
+use Data::Focus qw(focus);
 use Data::Focus::LensTester;
 use Data::Focus::Lens::HashArray::Index;
 use lib "t";
 use testlib::SampleObject;
+use testlib::Identity qw(check_identity);
 
 sub make_label {
     my ($target, $key, $immutable) = @_;
@@ -72,8 +74,14 @@ foreach my $case (
             $tester->test_lens_laws(
                 lens => $lens, target => $targets{$case->{target}},
                 exp_focal_points => $case->{exp_focal_points},
-                exp_mutate => !$immutable,
             );
+        };
+        subtest "$label, set() mutation" => sub {
+            foreach my $part ($tester->parts) {
+                my $target = $targets{$case->{target}}->();
+                my $result = focus($target)->set($lens, $part);
+                check_identity($result, $target, ($case->{exp_focal_points} == 0 ? 1 : !$immutable));
+            }
         };
     }
 }
@@ -97,11 +105,17 @@ foreach my $case (
         my %test_args = (
             lens => $lens, target => $targets{$case->{target}},
             exp_focal_points => $case->{exp_focal_points},
-            exp_mutate => ($case->{target} eq "undef" ? 0 : !$immutable)
         );
         subtest $label => sub {
             $tester->test_set_set(%test_args);
             $tester->test_set_get(%test_args);
+        };
+        subtest "$label, set() mutation" => sub {
+            foreach my $part ($tester->parts) {
+                my $target = $targets{$case->{target}}->();
+                my $result = focus($target)->set($lens, $part);
+                check_identity($result, $target, ($case->{target} eq "undef" ? 0 : !$immutable));
+            }
         };
     }
 }

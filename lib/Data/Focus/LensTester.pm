@@ -18,6 +18,10 @@ sub new {
     return $self;
 }
 
+sub parts {
+    return @{$_[0]->{parts}};
+}
+
 sub test_lens_laws {
     my ($self, %args) = @_;
     my @args = _get_args(%args);
@@ -42,8 +46,9 @@ sub _get_args {
     croak "target must be a code-ref" if ref($target) ne "CODE";
     my $exp_focal_points = $args{exp_focal_points};
     croak "exp_focal_points must be Int" if !defined($exp_focal_points) || $exp_focal_points !~ /^\d+$/;
-    my $exp_mutate = $args{exp_mutate};
-    return ($target, $lens, $exp_focal_points, $exp_mutate);
+
+    die "exp_mutate disabled" if exists $args{exp_mutate};
+    return ($target, $lens, $exp_focal_points);
 }
 
 sub _test_focal_points {
@@ -55,7 +60,7 @@ sub _test_focal_points {
 }
 
 sub _test_set_set {
-    my ($self, $target, $lens, $exp_focal_points, $exp_mutate) = @_;
+    my ($self, $target, $lens, $exp_focal_points) = @_;
     subtest "set-set law" => sub {
         foreach my $i1 (0 .. $#{$self->{parts}}) {
             foreach my $i2 (0 .. $#{$self->{parts}}) {
@@ -66,46 +71,30 @@ sub _test_set_set {
                 my $left_result = focus( focus($left_target)->set($lens, $part1) )->set($lens, $part2);
                 my $right_result = focus($right_target)->set($lens, $part2);
                 $self->{test_whole}->($left_result, $right_result);
-                _check_mutate("left", $left_target, $left_result, $exp_mutate, $exp_focal_points);
-                _check_mutate("right", $right_target, $right_result, $exp_mutate, $exp_focal_points);
             }
         }
     };
 }
 
-sub _check_mutate {
-    my ($label, $original, $result, $exp_mutate, $exp_focal_points) = @_;
-    if(defined($exp_mutate) && $exp_focal_points > 0) {
-        ## if there's no focal point, the result is the same object as the target.
-        if($exp_mutate) {
-            is(refaddr($original), refaddr($result), "$label: mutated");
-        }else {
-            isnt(refaddr($original), refaddr($result), "$label: not mutated");
-        }
-    }
-}
-
 sub _test_set_get {
-    my ($self, $target, $lens, $exp_focal_points, $exp_mutate) = @_;
+    my ($self, $target, $lens, $exp_focal_points) = @_;
     subtest "set-get law" => sub {
         foreach my $part (@{$self->{parts}}) {
             my $left_target = $target->();
             my $left_set = focus($left_target)->set($lens, $part);
             my @left_parts = focus($left_set)->list($lens);
             $self->{test_part}->($_, $part) foreach @left_parts;
-            _check_mutate("set_get", $left_target, $left_set, $exp_mutate, $exp_focal_points);
         }
     };
 }
 
 sub _test_get_set {
-    my ($self, $target, $lens, $exp_focal_points, $exp_mutate) = @_;
+    my ($self, $target, $lens, $exp_focal_points) = @_;
     subtest "get-set law" => sub {
         foreach my $part (@{$self->{parts}}) {
             my $left_target = $target->();
             my $left_result = focus($left_target)->set($lens, focus($left_target)->get($lens));
             $self->{test_whole}->($left_result, $target->());
-            _check_mutate("get_set", $left_target, $left_result, $exp_mutate, $exp_focal_points);
         }
     };
 }
@@ -152,7 +141,7 @@ Data::Focus::LensTester - tester for Lens implementations
     
     $tester->test_lens_laws(
         lens => $lens, target => $create_target,
-        exp_focal_points => 1, exp_mutate => 1
+        exp_focal_points => 1
     );
 
 =head1 DESCRIPTION
@@ -301,6 +290,10 @@ Expected number of focal points the lens creates for the target.
 =head2 $tester->test_set_set(%args)
 
 Test individual lens laws. C<%args> are the same as C<test_lens_laws()> method.
+
+=head2 @parts = $tester->parts
+
+Get the parts passed in C<new()> method.
 
 =head1 AUTHOR
  
