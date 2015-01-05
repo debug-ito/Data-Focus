@@ -3,7 +3,6 @@ use strict;
 use warnings;
 use parent qw(Data::Focus::Lens);
 use Carp;
-use Data::Focus::LensMaker ();
 
 sub new {
     my ($class, %args) = @_;
@@ -12,40 +11,44 @@ sub new {
     }, $class;
 }
 
-sub _getter {
-    my ($self, $whole) = @_;
-    my $type = ref($whole);
-    if($type eq "ARRAY") {
-        return @$whole;
-    }elsif($type eq "HASH") {
-        my @keys = sort keys %$whole;
-        return @{$whole}{@keys};
-    }else {
-        return ();
-    }
-}
-
-sub _setter {
+sub _set_array {
     my ($self, $whole, @parts) = @_;
-    my $type = ref($whole);
-    if($type eq "ARRAY") {
-        if($self->{immutable}) {
-            return \@parts;
-        }else {
-            @$whole = @parts;
-            return $whole;
-        }
-    }elsif($type eq "HASH") {
-        my @keys = sort keys %$whole;
-        my $ret = $self->{immutable} ? {%$whole} : $whole;
-        $ret->{$keys[$_]} = $parts[$_] foreach 0 .. $#keys;
-        return $ret;
+    if($self->{immutable}) {
+        return \@parts;
     }else {
-        confess "This should not happen because there should be no focal point.";
+        @$whole = @parts;
+        return $whole;
     }
 }
 
-Data::Focus::LensMaker::make_lens_from_accessors(\&_getter, \&_setter);
+sub _set_hash {
+    my ($self, $whole, $keys, @parts) = @_;
+    my $ret = $self->{immutable} ? {%$whole} : $whole;
+    $ret->{$keys->[$_]} = $parts[$_] foreach 0 .. $#$keys;
+    return $ret;
+}
+
+sub apply {
+    my ($self, $part_mapper, $app_class) = @_;
+    return sub {
+        my ($whole) = @_;
+        my $type = ref($whole);
+        if($type eq "ARRAY") {
+            return $app_class->build_result(sub {
+                $self->_set_array(@_)
+            }, $whole, map { $part_mapper->($_) } @$whole);
+        }elsif($type eq "HASH") {
+            my @keys = keys %$whole;
+            return $app_class->build_result(sub {
+                my $orig = shift;
+                $self->_set_hash($orig, \@keys, @_)
+            }, $whole, map { $part_mapper->($_) } @{$whole}{@keys});
+        }else {
+            return $app_class->build_result(undef, $whole);
+        }
+    };
+}
+
 
 
 1;
