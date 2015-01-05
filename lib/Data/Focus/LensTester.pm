@@ -292,16 +292,6 @@ The C<$target> code-ref must return a brand-new C<$target_data> object for every
 
 Expected number of focal points the lens creates for the target.
 
-=item C<exp_mutate> => BOOL (optional)
-
-If set to true, the lens is expected to mutate the target itself (destructive update).
-The setter methods should return the same instance as the target.
-
-If set to false, the lens is expected to preserve the target (non-destructive update).
-The setter methods should return a different instance from the target.
-
-If not specified, the mutation check is not performed.
-
 =back
 
 =head2 $tester->test_set_get(%args)
@@ -311,6 +301,45 @@ If not specified, the mutation check is not performed.
 =head2 $tester->test_set_set(%args)
 
 Test individual lens laws. C<%args> are the same as C<test_lens_laws()> method.
+
+=head2 $tester->test_set_identity(%args)
+
+Test if C<set()> operation returns the same instance as the target.
+
+In this test, C<set()> is repeatedly called on each of the parts the C<$tester> has,
+and it checks if the returned result is the same instance as the target.
+If the lens is destructive (a mutator), the result should be the same instance as the target.
+If the lens is non-destructive, it should be a different instance.
+
+Fields in C<%args> are:
+
+=over
+
+=item C<lens> => L<Data::Focus::Lens> object (mandatory)
+
+The lens to be tested.
+
+=item C<target> => CODE (mandatory)
+
+A code-ref that returns the target object. See C<test_lens_laws()> method.
+
+=item C<exp_identity> => CODE (mandatory)
+
+A code-ref that determines the expected identity of the C<set()> result.
+
+It is called like
+
+    $bool_identity = $exp_identity->($part)
+
+where C<$part> is the part to be set to the target.
+
+If C<$bool_identity> is true,
+the return value of C<set()> should be identical to the target.
+If C<$bool_identity> is defined but false,
+the return value of C<set()> should be different from the target.
+If C<$bool_identity> is C<undef>, the test is skipped.
+
+=back
 
 =head1 AUTHOR
  
