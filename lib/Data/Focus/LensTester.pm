@@ -302,45 +302,6 @@ Expected number of focal points the lens creates for the target.
 
 Test individual lens laws. C<%args> are the same as C<test_lens_laws()> method.
 
-=head2 $tester->test_set_identity(%args)
-
-Test if C<set()> operation returns the same instance as the target.
-
-In this test, C<set()> is repeatedly called on each of the parts the C<$tester> has,
-and it checks if the returned result is the same instance as the target.
-If the lens is destructive (a mutator), the result should be the same instance as the target.
-If the lens is non-destructive, it should be a different instance.
-
-Fields in C<%args> are:
-
-=over
-
-=item C<lens> => L<Data::Focus::Lens> object (mandatory)
-
-The lens to be tested.
-
-=item C<target> => CODE (mandatory)
-
-A code-ref that returns the target object. See C<test_lens_laws()> method.
-
-=item C<exp_identity> => CODE (mandatory)
-
-A code-ref that determines the expected identity of the C<set()> result.
-
-It is called like
-
-    $bool_identity = $exp_identity->($part)
-
-where C<$part> is the part to be set to the target.
-
-If C<$bool_identity> is true,
-the return value of C<set()> should be identical to the target.
-If C<$bool_identity> is defined but false,
-the return value of C<set()> should be different from the target.
-If C<$bool_identity> is C<undef>, the test is skipped.
-
-=back
-
 =head1 AUTHOR
  
 Toshio Ito, C<< <toshioito at cpan.org> >>
