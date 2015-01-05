@@ -1,10 +1,10 @@
 use strict;
 use warnings FATAL => "all";
 use Test::More;
-use Test::Identity;
 use Data::Focus qw(focus);
 use lib "t";
 use testlib::SampleObject;
+use testlib::Identity qw(identical);
 
 note("--- Data::Focus without lenses");
 

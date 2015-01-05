@@ -1,9 +1,10 @@
 use strict;
 use warnings FATAL => "all";
 use Test::More;
-use Test::Identity;
 use Data::Focus qw(focus);
 use Data::Focus::Lens::HashArray::Recurse;
+use lib "t";
+use testlib::Identity qw(identical);
 
 note("--- if target is not hash/array, the lens is no-op");
 

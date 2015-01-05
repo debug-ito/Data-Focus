@@ -5,7 +5,7 @@ use Exporter qw(import);
 use Test::More;
 use Scalar::Util qw(refaddr);
 
-our @EXPORT_OK = qw(check_identity);
+our @EXPORT_OK = qw(check_identity identical not_identical);
 
 sub check_identity {
     my ($got_obj, $exp_obj, $exp_identical, $label) = @_;
@@ -26,6 +26,16 @@ sub check_identity {
             return isnt $got_addr, $exp_addr, "$label: non-identical";
         }
     }
+}
+
+sub identical ($$;$) {
+    @_ = ($_[0], $_[1], 1, $_[2]);
+    goto \&check_identity;
+}
+
+sub not_identical ($$;$) {
+    @_ = ($_[0], $_[1], 0, $_[2]);
+    goto \&check_identity;
 }
 
 1;

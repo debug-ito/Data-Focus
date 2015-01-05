@@ -1,18 +1,13 @@
 use strict;
 use warnings FATAL => "all";
 use Test::More;
-use Test::Identity;
 use Scalar::Util qw(refaddr);
 use Data::Focus qw(focus);
 use Data::Focus::Lens::HashArray::Index;
+use lib "t";
+use testlib::Identity qw(identical not_identical);
 
 note("immutable lens creates minimal instances");
-
-sub not_identical {
-    my ($o1, $o2, $msg) = @_;
-    local $Test::Builder::Level = $Test::Builder::Level + 1;
-    isnt refaddr($o1), refaddr($o2), $msg;
-}
 
 sub gen_target {
     +[

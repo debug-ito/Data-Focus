@@ -1,12 +1,12 @@
 use strict;
 use warnings FATAL => "all";
 use Test::More;
-use Test::Identity;
 use Scalar::Util qw(refaddr);
 use Data::Focus qw(focus);
 use Data::Focus::Lens::HashArray::Index;
 use lib "t";
 use testlib::SampleObject;
+use testlib::Identity qw(identical);
 
 sub lens {
     my ($key, $immutable) = @_;

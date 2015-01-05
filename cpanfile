@@ -8,7 +8,6 @@ requires "Sub::Recursive" => "0.03";
 
 on 'test' => sub {
     requires 'Test::More' => "0";
-    requires 'Test::Identity';
     requires 'Test::Fatal';
     requires 'Exporter';
     requires "Scalar::Util";

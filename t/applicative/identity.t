@@ -1,10 +1,10 @@
 use strict;
 use warnings FATAL => "all";
 use Test::More;
-use Test::Identity;
 use Data::Focus::Applicative::Identity;
 use lib "t";
 use testlib::ApplicativeUtil qw(make_applicative_methods test_functor_basic);
+use testlib::Identity qw(identical);
 
 my $c = "Data::Focus::Applicative::Identity";
 

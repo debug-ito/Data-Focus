@@ -1,7 +1,6 @@
 use strict;
 use warnings FATAL => "all";
 use Test::More;
-use Test::Identity;
 use Data::Focus::Applicative::Const::List;
 use lib "t";
 use testlib::ApplicativeUtil qw(make_applicative_methods test_functor_basic test_const_basic);

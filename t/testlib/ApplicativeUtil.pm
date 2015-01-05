@@ -3,7 +3,7 @@ use strict;
 use warnings FATAL => "all";
 use Exporter qw(import);
 use Test::More;
-use Test::Identity;
+use testlib::Identity qw(identical);
 
 our @EXPORT_OK = qw(make_applicative_methods test_functor_basic test_const_basic);
 
