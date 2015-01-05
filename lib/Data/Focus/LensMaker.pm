@@ -109,6 +109,9 @@ C<$setter> is supposed to set parts into the C<$target>, and return the result.
 
     $modified_target = $lens_self->$setter($target, @parts)
 
+where C<@parts> are the data parts to be set to the C<$target>.
+C<@parts> has the same length and order as the one retuned by C<$getter>.
+
 It's up to the C<$setter> whether the operation is destructive or not.
 If you modify the C<$target> itself in the C<$setter>, the lens is destructive.
 
