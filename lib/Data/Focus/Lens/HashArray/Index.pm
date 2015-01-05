@@ -88,7 +88,21 @@ Data::Focus::Lens::HashArray::Index - a lens to focus on element(s) of hash/arra
 
 =head1 SYNOPSIS
 
-TODO.
+    use Data::Focus qw(focus);
+    use Data::Focus::Lens::HashArray::Index;
+    
+    sub lens { Data::Focus::Lens::HashArray::Index->new(key => $_[0]) }
+    
+    my $target = {
+        foo => "bar",
+        hoge => [ "a", "b", "c" ]
+    };
+    
+    focus($target)->get(lens("foo"));                ## => "bar"
+    focus($target)->get(lens("hoge"));               ## => ["a", "b", "c"]
+    focus($target)->get(lens("hoge"), lens(1));      ## => "b"
+    
+    focus($target)->list(lens("hoge"), lens([0, 2])) ## => ("a", "c")
 
 =head1 DESCRIPTION
 
@@ -98,7 +112,7 @@ which focuses on one or more elements in a hash or array.
 Conceptually, this lens does the same as hash/array dereferences and slices.
 
     $hash->{key}
-    @{$hash}{qw(key1 key2 key3)}
+    @{$hash}{"key1", "key2", "key3"}
     $array->[4]
     @{$array}[3,4,5]
 
