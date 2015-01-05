@@ -60,7 +60,7 @@ __END__
 
 =head1 NAME
 
-Data::Focus::Lens::HashArray::Recurse - recursively traverse hash/array
+Data::Focus::Lens::HashArray::Recurse - recursively traverse a tree of hashes and arrays
 
 =head1 SYNOPSIS
 
