@@ -104,9 +104,29 @@ Data::Focus - generic getter/setter/traverser for complex data structures
 
 =head1 DESCRIPTION
 
-- The concept of "focused", "target", "lenses".
+B<tl;dr>: This is a port of Haskell's L<lens-family-core|http://hackage.haskell.org/package/lens-family-core> package.
 
-=head2 Lenses
+L<Data::Focus> provides a way to access data elements in a deep, complex and nested data structure.
+So it's just a complicated version of L<Data::Diver>, but L<Data::Focus> has the following notable features.
+
+=over
+
+=item *
+
+It provides a B<< generic way >> to access B<any> type of objects as long as they have appropriate "lenses".
+It's like L<DBI> for data access.
+
+=item *
+
+It makes it easy to update B<immutable> objects. Strictly speaking, that means creating B<partially> modified copies of immutable objects.
+
+=back
+
+=head2 Terminology
+
+## The concept of "target" and "lenses". Data::Focus contains them.
+
+## lenses are like DBD::* modules for DBI
 
 =head2 Lens Coercion
 
@@ -201,9 +221,59 @@ If it focuses on nothing (zero focal point), C<$updater> is never called. C<$mod
 If it focuses on more than one values (multiple focal points), C<$updater> is repeatedly called for each of them.
 So C<$updater> should not have side-effects.
 
+=head1 HOW TO CREATE A LENS
+
 =head1 RELATIONSHIP TO HASKELL
 
 =head1 SEE ALSO
+
+=over
+
+=item *
+
+L<Data::Diver>
+
+=item *
+
+L<JSON::Pointer>
+
+=item *
+
+L<Data::Path>
+
+=item *
+
+L<Data::SPath>
+
+=item *
+
+L<Data::DPath>
+
+=item *
+
+L<Data::FetchPath>
+
+=item *
+
+L<Data::PathSimple>
+
+=item *
+
+L<Data::SimplePath>
+
+=item *
+
+L<Data::Transformer>
+
+=item *
+
+L<Data::Walk>
+
+=item *
+
+L<Data::Traverse>
+
+=back
 
 =head1 TODO
 
@@ -239,7 +309,7 @@ Toshio Ito, C<< <toshioito at cpan.org> >>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2014 Toshio Ito.
+Copyright 2015 Toshio Ito.
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of either: the GNU General Public License as published
