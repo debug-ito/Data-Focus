@@ -20,7 +20,7 @@ This class specifies the common interface for all applicative functors used in L
 All applicative functors must inherit L<Data::Focus::Applicative>, and implement the following methods.
 
 
-=head1 CLASS METHODS
+=head1 ABSTRACT CLASS METHODS
 
 =head2 $f_result = $class->build_result($builder, $original, @f_parts)
 
