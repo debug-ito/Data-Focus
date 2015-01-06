@@ -3,14 +3,11 @@ use strict;
 use warnings;
 use overload "." => sub {
     my ($self, $other, $swap) = @_;
-    return $swap ? $other->compose($self) : $self->compose($other);
-};
-
-sub compose {
-    my ($self, @lenses) = @_;
     require Data::Focus::Lens::Composite;
-    return Data::Focus::Lens::Composite->new($self, @lenses);
-}
+    return Data::Focus::Lens::Composite->new(
+        $swap ? ($other, $self) : ($self, $other)
+    );
+};
 
 1;
 __END__
@@ -24,6 +21,8 @@ Data::Focus::Lens - base class for lenses
 =head1 DESCRIPTION
 
 L<Data::Focus::Lens> is the base class for all lenses in L<Data::Focus> framework.
+
+This class implements nothing except for operator overloads. See L</OVERLOADS> for detail.
 
 =head1 ABSTRACT OBJECT METHODS
 
@@ -46,24 +45,13 @@ C<$applicative_class> is the name of a L<Data::Focus::Applicative> subclass.
 The return value from C<$part_mapper> and C<$whole_mapper> must be an object of this class.
 Generally speaking, it defines the "context" in which this lens operation is performed.
 
-=head1 OBJECT METHODS
-
-Object methods implemented by this class. You should not override them.
-
-=head2 $composite_lens = $lens->compose(@other_lenses)
-
-Compose the C<$lens> with one or more C<@other_lenses> to produce the C<$composite_lens>.
-C<$composite_lens> is a L<Data::Focus::Lens::Composite> object.
-
 =head1 OVERLOADS
 
-The C<"."> operator is overloaded by C<compose()> method, i.e.,
+The C<"."> operator is overloaded. It means lens composition.
 
-    $lens1 . $lens2
+    $composite_lens = $lens1 . $lens2
 
-is equivalent to
-
-    $lens1->compose($lens2)
+See L<Data::Focus::Lens::Composite> for detail.
 
 =head1 AUTHOR
  

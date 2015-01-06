@@ -26,30 +26,24 @@ my $lens3 = lens("bar");
     
     ## or
     
-    my $composite2 = $lens1->compose($lens2, $lens3);
-    
-    ## or
-    
-    my $composite3 = $lens1 . $lens2 . $lens3;
+    my $composite2 = $lens1 . $lens2 . $lens3;
     
     ## Then, you can write
     
     my $value1 = focus($target)->get($composite1);
     my $value2 = focus($target)->get($composite2);
-    my $value3 = focus($target)->get($composite3);
     
     ## instead of
     
-    my $value = focus($target)->get($lens1, $lens2, $lens3);
+    my $value3 = focus($target)->get($lens1, $lens2, $lens3);
+
+    ## $value1 == $value2 == $value3
 
     ####
     isa_ok $composite1, "Data::Focus::Lens";
     isa_ok $composite1, "Data::Focus::Lens::Composite";
     isa_ok $composite2, "Data::Focus::Lens";
     isa_ok $composite2, "Data::Focus::Lens::Composite";
-    isa_ok $composite3, "Data::Focus::Lens";
-    isa_ok $composite3, "Data::Focus::Lens::Composite";
-    is $value,  "buzz";
     is $value1, "buzz";
     is $value2, "buzz";
     is $value3, "buzz";

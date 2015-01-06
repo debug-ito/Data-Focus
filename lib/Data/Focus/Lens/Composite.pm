@@ -26,23 +26,22 @@ Data::Focus::Lens::Composite - a lens composed of multiple lenses
 
 =head1 SYNOPSIS
 
-    my $composite = Data::Focus::Lens::Composite->new($lens1, $lens2, $lens3);
+    my $composite1 = Data::Focus::Lens::Composite->new($lens1, $lens2, $lens3);
     
     ## or
     
-    my $composite = $lens1->compose($lens2, $lens3);
-    
-    ## or
-    
-    my $composite = $lens1 . $lens2 . $lens3;
+    my $composite2 = $lens1 . $lens2 . $lens3;
     
     ## Then, you can write
     
-    my $value = focus($target)->get($composite);
+    my $value1 = focus($target)->get($composite1);
+    my $value2 = focus($target)->get($composite2);
     
     ## instead of
     
-    my $value = focus($target)->get($lens1, $lens2, $lens3);
+    my $value3 = focus($target)->get($lens1, $lens2, $lens3);
+
+    ## $value1 == $value2 == $value3
 
 =head1 DESCRIPTION
 
