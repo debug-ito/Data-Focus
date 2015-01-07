@@ -94,6 +94,8 @@ Data::Focus - generic getter/setter/traverser for complex data structures
 
 =head1 SYNOPSIS
 
+TODO
+
 =head1 DESCRIPTION
 
 B<tl;dr>: This is a port of Haskell's L<lens-family-core|http://hackage.haskell.org/package/lens-family-core> package.
@@ -120,7 +122,31 @@ L<Data::Focus> focuses on some data parts in a complex data structure.
 The complex data is called the B<target>.
 With L<Data::Focus>, you can get/set/modify the data parts it focuses on.
 
+L<Data::Focus> uses objects called B<lenses> to focus on data parts.
+Lenses are like DBD::* modules for L<DBI> framework.
+They know how to focus on the data parts in the target.
+Different lenses are used to focus into different types of targets.
 
+For example, consider the following code.
+
+    my $target = { foo => "bar" };
+    my $part = $target->{foo};
+    $target->{foo} = "buzz";
+
+In Perl, we can access the data part (C<"bar">) in the C<$target> by the subscript C<< ->{foo} >>.
+A lens's job is exactly what C<< ->{foo} >> does here.
+
+With L<Data::Focus> we can rewrite the above example to:
+
+    use Data::Focus qw(focus);
+    use Data::Focus::Lens::HashArray::Index;
+    
+    my $target = { foo => "bar" };
+    my $lens = Data::Focus::Lens::HashArray::Index->new(key => "foo");
+    my $part = focus($target)->get($lens);
+    focus($target)->set($lens, "buzz");
+
+I'm sure you don't wanna write this amount of code just to access an element in a hash. Be patient. I'll shorten them below.
 
 #### =head2 Terminology
 
