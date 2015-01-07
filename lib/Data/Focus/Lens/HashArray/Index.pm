@@ -127,7 +127,7 @@ If the target is a hash-ref, this lens behaves as hash dereference and slice.
 Duplicate keys in a slice are allowed.
 If different values are set to those keys, only the last one takes effect.
 
-It returns C<undef> for non-existent keys. You can set values for them.
+It returns C<undef> for non-existent keys. You can set values to them.
 
 =head2 ARRAY target
 

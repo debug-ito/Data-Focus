@@ -123,7 +123,7 @@ The complex data is called the B<target>.
 With L<Data::Focus>, you can get/set/modify the data parts it focuses on.
 
 L<Data::Focus> uses objects called B<lenses> to focus on data parts.
-Lenses are like DBD::* modules for L<DBI> framework.
+Lenses are like DBD::* modules in L<DBI> framework.
 They know how to focus on the data parts in the target.
 Different lenses are used to focus into different types of targets.
 
@@ -142,19 +142,55 @@ With L<Data::Focus> we can rewrite the above example to:
     use Data::Focus::Lens::HashArray::Index;
     
     my $target = { foo => "bar" };
-    my $lens = Data::Focus::Lens::HashArray::Index->new(key => "foo");
-    my $part = focus($target)->get($lens);
-    focus($target)->set($lens, "buzz");
+    my $foo_lens = Data::Focus::Lens::HashArray::Index->new(key => "foo");
+    my $part = focus($target)->get($foo_lens);
+    focus($target)->set($foo_lens, "buzz");
 
-I'm sure you don't wanna write this amount of code just to access an element in a hash. Be patient. I'll shorten them below.
+(I'm sure you don't wanna write this amount of code just to access an element in a hash. Don't worry. I'll shorten them below.)
 
-#### =head2 Terminology
+Anyway, the point is, C<focus()> function wraps the C<$target> in a L<Data::Focus> object,
+and methods of the L<Data::Focus> object use lenses to access data parts in C<$target>.
 
-## The concept of "target" and "lenses". Data::Focus contains them.
+=head2 Lenses
 
-## lenses are like DBD::* modules for DBI
+Every lens is a subclass of L<Data::Focus::Lens> class. Lenses included in this distribution are:
+
+=over
+
+=item L<Data::Focus::Lens::HashArray::Index>
+
+Index access to a hash/array. It's like C<< $hash->{$i}, $array->[$i], @{$hash}{$i1, $i2}, @{$array}[$i1, $i2] >>.
+
+=item L<Data::Focus::Lens::HashArray::All>
+
+Access all values in a hash/array. It's like C<< values(%$hash), @$array >>.
+
+=item L<Data::Focus::Lens::HashArray::Recurse>
+
+Recursively traverse all values in a tree of hashes and arrays.
+
+=item L<Data::Focus::Lens::Composite>
+
+Composition of multiple lenses.
+
+=back
+
+All Data::Focus::HashArray::* modules optionally support immutable update. See individual documents for detail.
 
 =head2 Lens Coercion
+
+If you pass something that's not a L<Data::Focus::Lens> object to L<Data::Focus>'s methods,
+it is coerced (cast) to a lens.
+
+Currently, the passed value is treated as the C<key> argument of L<Data::Focus::Lens::HashArray::Index>'s constructor.
+This means we can rewrite the above example to:
+
+    use Data::Focus qw(focus);
+    
+    my $target = { foo => "bar" };
+    my $part = focus($target)->get("foo");
+    focus($target)->set(foo => "buzz");
+
 
 =head2 Traversals and Focal Points
 
@@ -253,6 +289,8 @@ So C<$updater> should not have side-effects.
 
 =head1 SEE ALSO
 
+There are tons of modules in CPAN for data access and traversal.
+
 =over
 
 =item *
@@ -298,18 +336,6 @@ L<Data::Walk>
 =item *
 
 L<Data::Traverse>
-
-=back
-
-=head1 TODO
-
-=over
-
-=item *
-
-Option to expect specific number of focal points.
-If it fails, it croaks.
-(Haskell's statically typed Lens always has exactly one focal point. Maybe it's not Perl-friendly, though...)
 
 =back
 
