@@ -6,6 +6,7 @@ use Data::Focus::Util;
 
 sub new {
     my ($class, @lenses) = @_;
+    @lenses = map { Data::Focus::Util::coerce_to_lens($_) } @lenses;
     return bless \@lenses, $class;
 }
 
@@ -54,6 +55,9 @@ L<Data::Focus::Lens::Composite> is a L<Data::Focus::Lens> class that is composed
 Compose C<@lenses> to create a C<$composite> lens.
 
 C<@lenses> are composed in the same order as you pass them to C<into()>, C<get()> etc methods of L<Data::Focus>.
+
+If some of the C<@lenses> are not L<Data::Focus::Lens> objects, they are coerced to lenses.
+See L<Data::Focus/Lens Coercion> for detail.
 
 If C<@lenses> is empty, it returns a no-op lens.
 

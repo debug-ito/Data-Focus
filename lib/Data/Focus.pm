@@ -1,8 +1,7 @@
 package Data::Focus;
 use strict;
 use warnings;
-use Data::Focus::Lens::HashArray::Index;
-use Data::Focus::Util;
+use Data::Focus::Util qw(coerce_to_lens);
 use Carp;
 use Exporter qw(import);
 
@@ -27,7 +26,7 @@ sub new {
             $lenses = [$args{lens}];
         }
     }
-    @$lenses = map { _coerce_to_lens($_) } @$lenses;
+    @$lenses = map { coerce_to_lens($_) } @$lenses;
     my $self = bless {
         target => $target,
         lenses => $lenses
@@ -35,25 +34,18 @@ sub new {
     return $self;
 }
 
-sub _coerce_to_lens {
-    my ($maybe_lens) = @_;
-    eval { $maybe_lens->isa("Data::Focus::Lens") }
-        ? $maybe_lens
-        : Data::Focus::Lens::HashArray::Index->new(key => $maybe_lens);  ## default lens (for now)
-}
-
 sub into {
     my ($self, @lenses) = @_;
     my $deeper = ref($self)->new(
         target => $self->{target},
-        lens => [@{$self->{lenses}}, map { _coerce_to_lens($_) } @lenses]
+        lens => [@{$self->{lenses}}, map { coerce_to_lens($_) } @lenses]
     );
     return $deeper;
 }
 
 sub _create_whole_mapper {
     my ($self, $app_class, $updater, @additional_lenses) = @_;
-    my @lenses = (@{$self->{lenses}}, map { _coerce_to_lens($_) } @additional_lenses);
+    my @lenses = (@{$self->{lenses}}, map { coerce_to_lens($_) } @additional_lenses);
     return Data::Focus::Util::create_whole_mapper($app_class, $app_class->create_part_mapper($updater), @lenses);
 }
 
@@ -122,7 +114,15 @@ It makes it easy to update B<immutable> objects. Strictly speaking, that means c
 
 =back
 
-=head2 Terminology
+=head2 Concept
+
+L<Data::Focus> focuses on some data parts in a complex data structure.
+The complex data is called the B<target>.
+With L<Data::Focus>, you can get/set/modify the data parts it focuses on.
+
+
+
+#### =head2 Terminology
 
 ## The concept of "target" and "lenses". Data::Focus contains them.
 

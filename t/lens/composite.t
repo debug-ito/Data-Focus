@@ -19,8 +19,7 @@ my $lens1 = lens("foo");
 my $lens2 = lens(0);
 my $lens3 = lens("bar");
 
-{
-    note("--- synopsis");
+subtest "synopsis" => sub {
     ####
     my $composite1 = Data::Focus::Lens::Composite->new($lens1, $lens2, $lens3);
     
@@ -47,21 +46,29 @@ my $lens3 = lens("bar");
     is $value1, "buzz";
     is $value2, "buzz";
     is $value3, "buzz";
-}
+};
 
-{
-    note("--- lens associative law");
+subtest "lens associative law" => sub {
     my $com1 = ($lens1 . $lens2) . $lens3;
     my $com2 = $lens1 . ($lens2 . $lens3);
     is focus($target)->get($com1), "buzz";
     is focus($target)->get($com2), "buzz";
-}
+};
 
-{
-    note("--- empty composite lens");
+subtest "empty composite lens" => sub {
     my $lens = Data::Focus::Lens::Composite->new();
     isa_ok $lens, "Data::Focus::Lens::Composite";
     is_deeply focus($target)->get($lens), {foo => [{bar => "buzz"}]}, "empty composite lens is Identity lens";
-}
+};
+
+subtest "lens coercion" => sub {
+    foreach my $case (
+        {lens => Data::Focus::Lens::Composite->new("foo", 0, "bar")},
+        {lens => $lens1 . 0 . "bar"},
+        {lens => "foo" . (0 . $lens3)}
+    ) {
+        is focus($target)->get($case->{lens}), "buzz";
+    }
+};
 
 done_testing;
