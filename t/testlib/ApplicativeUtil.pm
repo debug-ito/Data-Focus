@@ -18,7 +18,8 @@ sub make_applicative_methods {
     ## $func <$> $f_data[0] <*> $f_data[1] <*> ...
     *{"${target_class}::fmap_ap"} = sub {
         my ($class, $func, @f_data) = @_;
-        return $class->build_result(sub { shift; $func->(@_) }, undef, @f_data);
+        die "f_data must not be empty" if !@f_data;
+        return $class->build_result($func, undef, @f_data);
     };
 
     *{"${target_class}::equals"} = sub {

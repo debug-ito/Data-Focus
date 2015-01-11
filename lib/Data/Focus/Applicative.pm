@@ -28,17 +28,17 @@ Build the C<$f_result> from C<$original> data and C<@f_parts> using C<$builder>.
 
 In pseudo-Haskell, this is equivalent to
 
-    build_result :: Applicative f => (s -> b -> b -> ... -> t) -> s -> [f b] -> f t
+    build_result :: Applicative f => (b -> b -> ... -> t) -> s -> [f b] -> f t
     build_result builder original f_parts =
       case f_parts of
         [] -> pure original
-        (p:ps) -> builder original <$> p <*> (ps !! 0) <*> (ps !! 1) ...
+        (p:ps) -> builder <$> p <*> (ps !! 0) <*> (ps !! 1) ...
 
 I think this is the only pattern where applicative functors are used in Lens implementations.
 
 C<$builder> is a code-ref, which may be called zero or more times
 
-    $built_data = $builder->($original, @parts)
+    $built_data = $builder->(@parts)
 
 where C<@parts> are the data inside C<@f_parts> applicative functors.
 
