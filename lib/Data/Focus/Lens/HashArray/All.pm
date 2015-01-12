@@ -28,25 +28,21 @@ sub _set_hash {
     return $ret;
 }
 
-sub apply {
-    my ($self, $part_mapper, $app_class) = @_;
-    return sub {
-        my ($whole) = @_;
-        my $type = ref($whole);
-        if($type eq "ARRAY") {
-            return $app_class->build_result(sub {
-                $self->_set_array(@_)
-            }, $whole, map { $part_mapper->($_) } @$whole);
-        }elsif($type eq "HASH") {
-            my @keys = keys %$whole;
-            return $app_class->build_result(sub {
-                my $orig = shift;
-                $self->_set_hash($orig, \@keys, @_)
-            }, $whole, map { $part_mapper->($_) } @{$whole}{@keys});
-        }else {
-            return $app_class->build_result(undef, $whole);
-        }
-    };
+sub apply_lens {
+    my ($self, $app_class, $part_mapper, $whole) = @_;
+    my $type = ref($whole);
+    if($type eq "ARRAY") {
+        return $app_class->build_result(sub {
+            $self->_set_array($whole, @_)
+        }, $whole, map { $part_mapper->($_) } @$whole);
+    }elsif($type eq "HASH") {
+        my @keys = keys %$whole;
+        return $app_class->build_result(sub {
+            $self->_set_hash($whole, \@keys, @_)
+        }, $whole, map { $part_mapper->($_) } @{$whole}{@keys});
+    }else {
+        return $app_class->build_result(undef, $whole);
+    }
 }
 
 

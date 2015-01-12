@@ -2,7 +2,6 @@ package Data::Focus::Lens::HashArray::Recurse;
 use strict;
 use warnings;
 use parent qw(Data::Focus::Lens);
-use Sub::Recursive qw(recursive $REC);
 
 sub new {
     my ($class, %args) = @_;
@@ -29,28 +28,23 @@ sub _set_hash {
     return $ret;
 }
 
-sub apply {
-    my ($self, $part_mapper, $app_class) = @_;
-    return recursive {
-        my ($data) = @_;
-        my $type = ref($data);
-        if($type eq "ARRAY") {
-            my @fparts = map { $REC->($_) } @$data;
-            return $app_class->build_result(sub {
-                my $data = shift;
-                return $self->_set_array($data, @_);
-            }, $data, @fparts);
-        }elsif($type eq "HASH") {
-            my @keys = keys %$data;
-            my @fparts = map { $REC->($_) } @{$data}{@keys};
-            return $app_class->build_result(sub {
-                my $data = shift;
-                return $self->_set_hash($data, \@keys, @_);
-            }, $data, @fparts);
-        }else {
-            return $part_mapper->($data);
-        }
-    };
+sub apply_lens {
+    my ($self, $app_class, $part_mapper, $data) = @_;
+    my $type = ref($data);
+    if($type eq "ARRAY") {
+        my @fparts = map { $self->apply_lens($app_class, $part_mapper, $_) } @$data;
+        return $app_class->build_result(sub {
+            return $self->_set_array($data, @_);
+        }, $data, @fparts);
+    }elsif($type eq "HASH") {
+        my @keys = keys %$data;
+        my @fparts = map { $self->apply_lens($app_class, $part_mapper, $_) } @{$data}{@keys};
+        return $app_class->build_result(sub {
+            return $self->_set_hash($data, \@keys, @_);
+        }, $data, @fparts);
+    }else {
+        return $part_mapper->($data);
+    }
 }
 
 1;
