@@ -21,10 +21,10 @@ sub _create_apply_lens_from_accessors {
     return sub {
         my ($self, $applicative_class, $part_mapper, $whole) = @_;
         my @parts = $self->$getter($whole);
-        return $applicative_class->build_result(sub {
+        return $applicative_class->build(sub {
             my $ret = $self->$setter($whole, @_);
             return $ret;
-        }, $whole, map { $part_mapper->($_) } @parts);
+        }, map { $part_mapper->($_) } @parts);
     };
 }
 
@@ -100,7 +100,6 @@ C<$getter> is supposed to extract the focused parts from the target data.
 
 C<$getter> is called in the list context.
 The number of C<@parts> determines the number of focal points the lens creates on the C<$target>.
-If an empty list is returned, it means there's no focal point and nothing can be set there.
 
 C<$setter> is supposed to set parts into the C<$target>, and return the result.
 
@@ -111,6 +110,9 @@ C<@parts> has the same length and order as the one retuned by C<$getter>.
 
 It's up to the C<$setter> whether the operation is destructive or not.
 If you modify the C<$target> itself in the C<$setter>, the lens is destructive.
+
+Note that C<$setter> is called with empty C<@parts> if C<$getter> returns an empty list.
+In that case, C<$setter> should return C<$target> unmodified or its clone.
 
 =head1 AUTHOR
  

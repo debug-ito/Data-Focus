@@ -45,6 +45,7 @@ sub _getter {
     
 sub _setter {
     my ($self, $whole, @parts) = @_;
+    return $whole if !@parts;
     if(!defined($whole)) {
         ## autovivifying
         if(grep { $_ !~ /^\d+$/ } @{$self->{keys}}) {
