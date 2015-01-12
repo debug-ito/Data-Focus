@@ -2,11 +2,11 @@ package Data::Focus::Lens::Composite;
 use strict;
 use warnings;
 use parent qw(Data::Focus::Lens);
-use Data::Focus::Util;
 
 sub new {
     my ($class, @lenses) = @_;
-    @lenses = map { Data::Focus::Util::coerce_to_lens($_) } @lenses;
+    require Data::Focus;
+    @lenses = map { Data::Focus->coerce_to_lens($_) } @lenses;
     return bless \@lenses, $class;
 }
 

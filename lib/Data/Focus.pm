@@ -1,7 +1,6 @@
 package Data::Focus;
 use strict;
 use warnings;
-use Data::Focus::Util qw(coerce_to_lens);
 use Data::Focus::Lens::Composite;
 use Carp;
 use Exporter qw(import);
@@ -27,7 +26,7 @@ sub new {
             $lenses = [$args{lens}];
         }
     }
-    @$lenses = map { coerce_to_lens($_) } @$lenses;
+    @$lenses = map { $class->coerce_to_lens($_) } @$lenses;
     my $self = bless {
         target => $target,
         lenses => $lenses
@@ -35,18 +34,28 @@ sub new {
     return $self;
 }
 
+sub coerce_to_lens {
+    my ($class_self, $maybe_lens) = @_;
+    if(eval { $maybe_lens->isa("Data::Focus::Lens") }) {
+        return $maybe_lens;
+    }else {
+        require Data::Focus::Lens::HashArray::Index;
+        return Data::Focus::Lens::HashArray::Index->new(key => $maybe_lens); ## default lens (for now)
+    }
+}
+
 sub into {
     my ($self, @lenses) = @_;
     my $deeper = ref($self)->new(
         target => $self->{target},
-        lens => [@{$self->{lenses}}, map { coerce_to_lens($_) } @lenses]
+        lens => [@{$self->{lenses}}, map { $self->coerce_to_lens($_) } @lenses]
     );
     return $deeper;
 }
 
 sub _apply_lenses_to_target {
     my ($self, $app_class, $updater, @additional_lenses) = @_;
-    my @lenses = (@{$self->{lenses}}, map { coerce_to_lens($_) } @additional_lenses);
+    my @lenses = (@{$self->{lenses}}, map { $self->coerce_to_lens($_) } @additional_lenses);
     return Data::Focus::Lens::Composite->new(@lenses)->apply_lens(
         $app_class,
         $app_class->create_part_mapper($updater),
@@ -220,6 +229,13 @@ The constructor. Fields in C<%args> are:
 =item C<lens> => LENS or ARRAYREF_OF_LENSES (optional)
 
 =back
+
+=head2 $lens = Data::Focus->coerce_to_lens($maybe_lens)
+
+Coerce C<$maybe_lens> to a L<Data::Focus::Lens> object.
+
+If C<$maybe_lens> is already a L<Data::Focus::Lens>, it returns C<$maybe_lens>.
+Otherwise, it creates a lens out of C<$maybe_lens>. See L</Lens Coercion> for detail.
 
 =head1 OBJECT METHODS
 
