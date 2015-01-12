@@ -12,7 +12,7 @@ make_applicative_methods($c, sub {
     return (@$da == @$db) && (grep { $da->[$_] eq $db->[$_] } 0 .. $#$da) == @$da;
 });
 
-test_functor_basic($c);
+test_functor_basic($c, builder_called => 0);
 test_const_basic($c);
 
 is_deeply($c->pure(100)->get_const, []);

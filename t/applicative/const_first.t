@@ -12,7 +12,7 @@ make_applicative_methods($c, sub {
     return (defined($da) && defined($db)) ? $da eq $db : !(defined($da) xor defined($db));
 });
 
-test_functor_basic($c);
+test_functor_basic($c, builder_called => 0);
 test_const_basic($c);
 
 is($c->pure(10)->get_const, undef);

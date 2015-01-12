@@ -10,7 +10,7 @@ my $c = "Data::Focus::Applicative::Identity";
 
 make_applicative_methods($c, sub { $_[0]->run_identity eq $_[1]->run_identity });
 
-test_functor_basic($c);
+test_functor_basic($c, builder_called => 1);
 
 {
     note("--- tests for Identity functor");

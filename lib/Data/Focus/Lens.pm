@@ -42,13 +42,13 @@ C<$part_mapper> is a code-ref with the following signature.
     $f_part_after = $part_mapper->($part_before)
 
 where C<$part_before> is a data part in C<$whole_before>.
-The return value C<$f_part_after> is a L<Data::Focus::Applicative> object.
+The return value C<$f_part_after> is an object of C<$applicative_class>.
 Calling C<< $part_mapper->($part_before) >> indicates that C<$lens> focuses on the C<$part_before>.
 
 C<$whole_before> is the target data for the C<$lens>.
 
 Return value C<$f_whole_after> is the result of applying the C<$lens> to C<$whole_before>,
-wrapped in a L<Data::Focus::Applicative> object.
+wrapped in an object of C<$applicative_class>.
 
 A typical implementation of C<apply_lens()> does the following.
 
@@ -66,13 +66,21 @@ Apply C<$part_mapper> to C<@parts>.
 
 =item 3.
 
-Collect ALL C<@f_parts_after> together to build the result. To unwrap L<Data::Focus::Applicative> wrappers of C<@f_parts_after>, we use C<build_result()> method.
+Collect ALL C<@f_parts_after> together to build the result. To unwrap L<Data::Focus::Applicative> wrappers of C<@f_parts_after>, we use C<build()> method.
 
-    $f_whole_after = $applicative_class->build_result(sub {
+    $f_whole_after = $applicative_class->build(sub {
         my (@parts_after) = @_;
         my $whole_after = ...;
         return $whole_after;
-    }, $whole_before, @f_parts_after)
+    }, @f_parts_after)
+
+The callback passed to C<build()> method is supposed to set C<@parts_after> into the C<$whole_before> (whether or not it's destructive),
+and return the C<$whole_after>.
+
+=item 4.
+
+Return C<$f_whole_after> obtained from C<build()> method.
+
 
 =back
 

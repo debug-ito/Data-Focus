@@ -10,16 +10,12 @@ our @EXPORT_OK = qw(make_applicative_methods test_functor_basic test_const_basic
 sub make_applicative_methods {
     my ($target_class, $equals_code) = @_;
     no strict "refs";
-    *{"${target_class}::pure"} = sub {
-        my ($class, $datum) = @_;
-        return $class->build_result(undef, $datum);
-    };
 
     ## $func <$> $f_data[0] <*> $f_data[1] <*> ...
     *{"${target_class}::fmap_ap"} = sub {
         my ($class, $func, @f_data) = @_;
         die "f_data must not be empty" if !@f_data;
-        return $class->build_result($func, undef, @f_data);
+        return $class->build($func, @f_data);
     };
 
     *{"${target_class}::equals"} = sub {
@@ -29,7 +25,9 @@ sub make_applicative_methods {
 }
 
 sub test_functor_basic {
-    my ($c) = @_;
+    my ($c, %exps) = @_;
+    my $exp_builder_called = $exps{builder_called};
+    die "builder_called param is mandatory" if not defined $exp_builder_called;
     {
         note("--- $c: functor and applicative functor laws");
         my $id = sub { $_[0] };
@@ -47,28 +45,33 @@ sub test_functor_basic {
     }
 
     {
-        note("--- $c: build_result common spec");
+        note("--- $c: build() and pure() equivalence");
+        foreach my $data ("", 0, 1, "hoge") {
+            ok $c->equals($c->pure($data), $c->build(sub { $data })), "'$data': pure(\$data) = build(sub { \$data })";
+        }
+    }
+
+    {
+        note("--- $c: build() common spec");
         my @args = ();
-        my $original = {};
-        my $pure = $c->build_result(sub { push @args, \@_ }, $original);
-        is scalar(@args), 0, "builder not called";
+        my $pure = $c->build(sub { push @args, \@_ });
+        is scalar(@args), $exp_builder_called, "builder called $exp_builder_called times";
+        foreach my $arg (@args) {
+            is scalar(@$arg), 0, "0 arg given";
+        }
         isa_ok $pure, $c;
         isa_ok $pure, "Data::Focus::Applicative";
 
         @args = ();
-        my $built = $c->build_result(sub { push @args, \@_ }, $original, map { $c->pure($_) } 10, 20, 30);
-        ## Number of execution of the $builder depends on Functor implementation
-        if(@args == 0) {
-            note("builder is not called for $c");
-        }else {
-            foreach my $arg (@args) {
-                is scalar(@$arg), 3, "3 args given";
-            }
+        my $built = $c->build(sub { push @args, \@_ }, map { $c->pure($_) } 10, 20, 30);
+        is scalar(@args), $exp_builder_called, "builder called $exp_builder_called times";
+        foreach my $arg (@args) {
+            is scalar(@$arg), 3, "3 args given";
         }
         isa_ok $built, $c;
         isa_ok $built, "Data::Focus::Applicative";
     }
-    
+
     {
         note("--- $c: create_part_mapper");
         my $updater = sub { $_[0] };
