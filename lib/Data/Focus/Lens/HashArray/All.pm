@@ -13,6 +13,7 @@ sub new {
 
 sub _set_array {
     my ($self, $whole, @parts) = @_;
+    return $whole if !@parts;
     if($self->{immutable}) {
         return \@parts;
     }else {
@@ -23,6 +24,7 @@ sub _set_array {
 
 sub _set_hash {
     my ($self, $whole, $keys, @parts) = @_;
+    return $whole if !@parts;
     my $ret = $self->{immutable} ? {%$whole} : $whole;
     $ret->{$keys->[$_]} = $parts[$_] foreach 0 .. $#$keys;
     return $ret;
@@ -32,16 +34,16 @@ sub apply_lens {
     my ($self, $app_class, $part_mapper, $whole) = @_;
     my $type = ref($whole);
     if($type eq "ARRAY") {
-        return $app_class->build_result(sub {
+        return $app_class->build(sub {
             $self->_set_array($whole, @_)
-        }, $whole, map { $part_mapper->($_) } @$whole);
+        }, map { $part_mapper->($_) } @$whole);
     }elsif($type eq "HASH") {
         my @keys = keys %$whole;
-        return $app_class->build_result(sub {
+        return $app_class->build(sub {
             $self->_set_hash($whole, \@keys, @_)
-        }, $whole, map { $part_mapper->($_) } @{$whole}{@keys});
+        }, map { $part_mapper->($_) } @{$whole}{@keys});
     }else {
-        return $app_class->build_result(undef, $whole);
+        return $app_class->pure($whole);
     }
 }
 
