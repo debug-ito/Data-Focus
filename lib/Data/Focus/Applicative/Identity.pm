@@ -11,7 +11,7 @@ sub new {
 sub build_result {
     my ($class, $builder, $original, @f_parts) = @_;
     return (@f_parts == 0) ? $class->new($original)
-        : $class->new($builder->($original, map { $_->run_identity } @f_parts));
+        : $class->new($builder->(map { $_->run_identity } @f_parts));
     ## should we type-check @f_parts?
 }
 

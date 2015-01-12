@@ -62,8 +62,7 @@ sub test_functor_basic {
             note("builder is not called for $c");
         }else {
             foreach my $arg (@args) {
-                identical $arg->[0], $original, "arg0 is the original";
-                is scalar(@$arg), 4, "4 args given";
+                is scalar(@$arg), 3, "3 args given";
             }
         }
         isa_ok $built, $c;
