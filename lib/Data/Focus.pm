@@ -2,6 +2,7 @@ package Data::Focus;
 use strict;
 use warnings;
 use Data::Focus::Util qw(coerce_to_lens);
+use Data::Focus::Lens::Composite;
 use Carp;
 use Exporter qw(import);
 
@@ -43,27 +44,31 @@ sub into {
     return $deeper;
 }
 
-sub _create_whole_mapper {
+sub _apply_lenses_to_target {
     my ($self, $app_class, $updater, @additional_lenses) = @_;
     my @lenses = (@{$self->{lenses}}, map { coerce_to_lens($_) } @additional_lenses);
-    return Data::Focus::Util::create_whole_mapper($app_class, $app_class->create_part_mapper($updater), @lenses);
+    return Data::Focus::Lens::Composite->new(@lenses)->apply_lens(
+        $app_class,
+        $app_class->create_part_mapper($updater),
+        $self->{target}
+    );
 }
 
 sub get {
     my ($self, @lenses) = @_;
     require Data::Focus::Applicative::Const::First;
-    my $whole_mapper = $self->_create_whole_mapper("Data::Focus::Applicative::Const::First", undef,
-                                                   @lenses);
-    my $ret = $whole_mapper->($self->{target})->get_const;
+    my $ret = $self->_apply_lenses_to_target(
+        "Data::Focus::Applicative::Const::First", undef, @lenses
+    )->get_const;
     return defined($ret) ? $$ret : undef;
 }
 
 sub list {
     my ($self, @lenses) = @_;
     require Data::Focus::Applicative::Const::List;
-    my $whole_mapper = $self->_create_whole_mapper("Data::Focus::Applicative::Const::List", undef,
-                                                   @lenses);
-    my $traversed_list = $whole_mapper->($self->{target})->get_const;
+    my $traversed_list = $self->_apply_lenses_to_target(
+        "Data::Focus::Applicative::Const::List", undef, @lenses
+    )->get_const;
     return wantarray ? @$traversed_list : $traversed_list->[0];
 }
 
@@ -72,9 +77,9 @@ sub over {
     my ($self, @lenses) = @_;
     croak "updater param must be a code-ref" if ref($updater) ne "CODE";
     require Data::Focus::Applicative::Identity;
-    my $whole_mapper = $self->_create_whole_mapper("Data::Focus::Applicative::Identity", $updater,
-                                                   @lenses);
-    return $whole_mapper->($self->{target})->run_identity;
+    return $self->_apply_lenses_to_target(
+        "Data::Focus::Applicative::Identity", $updater, @lenses
+    )->run_identity;
 }
 
 sub set {
@@ -190,7 +195,6 @@ This means we can rewrite the above example to:
     my $target = { foo => "bar" };
     my $part = focus($target)->get("foo");
     focus($target)->set(foo => "buzz");
-
 
 =head2 Traversals and Focal Points
 

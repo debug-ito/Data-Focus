@@ -10,9 +10,17 @@ sub new {
     return bless \@lenses, $class;
 }
 
-sub apply {
-    my ($self, $part_mapper, $applicative_class) = @_;
-    return Data::Focus::Util::create_whole_mapper($applicative_class, $part_mapper, @$self);
+sub apply_lens {
+    my ($self, $applicative_class, $part_mapper, $whole) = @_;
+    my $top_lens = $self->[0];
+    if(!defined($top_lens)) {
+        return $part_mapper->($whole);
+    }
+    foreach my $lens (reverse @{$self}[1 .. $#$self]) {
+        my $cur_part_mapper = $part_mapper;
+        $part_mapper = sub { $lens->apply_lens($applicative_class, $cur_part_mapper, shift) };
+    }
+    return $top_lens->apply_lens($applicative_class, $part_mapper, $whole);
 }
 
 
