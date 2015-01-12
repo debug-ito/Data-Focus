@@ -8,10 +8,14 @@ sub new {
     return bless \$datum, $class;
 }
 
-sub build_result {
-    my ($class, $builder, $original, @f_parts) = @_;
-    return @f_parts == 0 ? $class->new($class->mempty)
-        : $class->new($class->mconcat(map { $_->get_const } @f_parts));
+sub pure {
+    my ($class) = @_; ## ignore the datum
+    return $class->new($class->mempty);
+}
+
+sub build {
+    my ($class, $builder, @f_parts) = @_;
+    return $class->new($class->mconcat(map { $_->get_const } @f_parts));
 }
 
 sub get_const {
@@ -43,7 +47,9 @@ which define the L<Monoid|http://hackage.haskell.org/package/base/docs/Data-Mono
 
 =head1 CLASS METHODS
 
-=head2 build_result
+=head2 build
+
+=head2 pure
 
 =head2 create_part_mapper
 

@@ -8,10 +8,11 @@ sub new {
     return bless \$datum, $class;
 }
 
-sub build_result {
-    my ($class, $builder, $original, @f_parts) = @_;
-    return (@f_parts == 0) ? $class->new($original)
-        : $class->new($builder->(map { $_->run_identity } @f_parts));
+*pure = *new;
+
+sub build {
+    my ($class, $builder, @f_parts) = @_;
+    return $class->new($builder->(map { $_->run_identity } @f_parts));
     ## should we type-check @f_parts?
 }
 
@@ -42,7 +43,9 @@ applicative functor.
 
 =head1 CLASS METHODS
 
-=head2 build_result
+=head2 build
+
+=head2 pure
 
 =head2 create_part_mapper
 
