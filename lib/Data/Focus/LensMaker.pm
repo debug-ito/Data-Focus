@@ -12,22 +12,19 @@ sub make_lens_from_accessors {
     confess "Top level call. Something is wrong." if !defined($calling_package);
     {
         no strict "refs";
-        *{"${calling_package}::apply"} = _create_apply_from_accessors($getter, $setter);
+        *{"${calling_package}::apply_lens"} = _create_apply_lens_from_accessors($getter, $setter);
     }
 }
 
-sub _create_apply_from_accessors {
+sub _create_apply_lens_from_accessors {
     my ($getter, $setter) = @_;
     return sub {
-        my ($self, $part_mapper, $applicative_class) = @_;
-        return sub {
-            my ($whole) = @_;
-            my @parts = $self->$getter($whole);
-            return $applicative_class->build_result(sub {
-                my $ret = $self->$setter(@_);
-                return $ret;
-            }, $whole, map { $part_mapper->($_) } @parts);
-        };
+        my ($self, $applicative_class, $part_mapper, $whole) = @_;
+        my @parts = $self->$getter($whole);
+        return $applicative_class->build_result(sub {
+            my $ret = $self->$setter($whole, @_);
+            return $ret;
+        }, $whole, map { $part_mapper->($_) } @parts);
     };
 }
 
