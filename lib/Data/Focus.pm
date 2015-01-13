@@ -122,7 +122,7 @@ So it's just a complicated version of L<Data::Diver>, but L<Data::Focus> has the
 =item *
 
 It provides a B<< generic way >> to access B<any> type of objects as long as they have appropriate "lenses".
-It's like L<DBI> for data access.
+It's like L<DBI> of accessing nested data structures.
 
 =item *
 
@@ -134,7 +134,7 @@ It makes it easy to update B<immutable> objects. Strictly speaking, that means c
 
 L<Data::Focus> focuses on some data parts in a complex data structure.
 The complex data is called the B<target>.
-With L<Data::Focus>, you can get/set/modify the data parts it focuses on.
+With L<Data::Focus>, you can get/set/modify data parts within the target.
 
 L<Data::Focus> uses objects called B<lenses> to focus on data parts.
 Lenses are like DBD::* modules in L<DBI> framework.
@@ -143,24 +143,25 @@ Different lenses are used to focus into different types of targets.
 
 For example, consider the following code.
 
-    my $target = { foo => "bar" };
-    my $part = $target->{foo};
-    $target->{foo} = "buzz";
+    my $target = ["hoge", { foo => "bar" }];
+    my $part = $target->[1]{foo};
+    $target->[1]{foo} = "buzz";
 
-In Perl, we can access the data part (C<"bar">) in the C<$target> by the subscript C<< ->{foo} >>.
-A lens's job is exactly what C<< ->{foo} >> does here.
+In Perl, we can access the data part (C<"bar">) in the C<$target> by the subscripts C<< ->[1]{foo} >>.
+A lens's job is exactly what C<< ->[1]{foo} >> does here.
 
 With L<Data::Focus> we can rewrite the above example to:
 
     use Data::Focus qw(focus);
     use Data::Focus::Lens::HashArray::Index;
     
-    my $target = { foo => "bar" };
-    my $foo_lens = Data::Focus::Lens::HashArray::Index->new(key => "foo");
-    my $part = focus($target)->get($foo_lens);
-    focus($target)->set($foo_lens, "buzz");
+    my $target = ["hoge", { foo => "bar" }];
+    my $lens_1   = Data::Focus::Lens::HashArray::Index->new(key => 1);
+    my $lens_foo = Data::Focus::Lens::HashArray::Index->new(key => "foo");
+    my $part = focus($target)->get($lens_1, $lens_foo);
+    focus($target)->set($lens_1, $lens_foo, "buzz");
 
-(I'm sure you don't wanna write this amount of code just to access an element in a hash. Don't worry. I'll shorten them below.)
+(I'm sure you don't wanna write this amount of code just to access an element in the C<$target>. Don't worry. I'll shorten them below.)
 
 Anyway, the point is, C<focus()> function wraps the C<$target> in a L<Data::Focus> object,
 and methods of the L<Data::Focus> object use lenses to access data parts in C<$target>.
@@ -201,11 +202,20 @@ This means we can rewrite the above example to:
 
     use Data::Focus qw(focus);
     
-    my $target = { foo => "bar" };
-    my $part = focus($target)->get("foo");
-    focus($target)->set(foo => "buzz");
+    my $target = ["hoge", { foo => "bar" }];
+    my $part = focus($target)->get(1, "foo");
+    focus($target)->set(1, foo => "buzz");
+
+We are planning a more dynamic mechanism of lens coercion in future releases.
+However, as long as the target is a hash-ref or array-ref, L<Data::Focus::Lens::HashArray::Index> will always be used for coercion,
+i.e., the above example is guaranteed to work.
 
 =head2 Traversals and Focal Points
+
+As you might already notice, a lens can focus on more than one data parts.
+
+
+=head2 Lens Composition
 
 =head1 EXPORTABLE FUNCTIONS
 
