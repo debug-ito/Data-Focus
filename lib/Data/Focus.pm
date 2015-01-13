@@ -132,9 +132,10 @@ It makes it easy to update B<immutable> objects. Strictly speaking, that means c
 
 =head2 Concept
 
-L<Data::Focus> focuses on some data parts in a complex data structure.
+L<Data::Focus> focuses on some parts of a complex data structure.
 The complex data is called the B<target>.
-With L<Data::Focus>, you can get/set/modify data parts within the target.
+The parts it focuses on are called B<focal points>.
+With L<Data::Focus>, you can get/set/modify the data at the focal points within the target.
 
 L<Data::Focus> uses objects called B<lenses> to focus on data parts.
 Lenses are like DBD::* modules in L<DBI> framework.
@@ -164,7 +165,7 @@ With L<Data::Focus> we can rewrite the above example to:
 (I'm sure you don't wanna write this amount of code just to access an element in the C<$target>. Don't worry. I'll shorten them below.)
 
 Anyway, the point is, C<focus()> function wraps the C<$target> in a L<Data::Focus> object,
-and methods of the L<Data::Focus> object use lenses to access data parts in C<$target>.
+and methods of the L<Data::Focus> object use lenses to access data parts at the focal points.
 
 =head2 Lenses
 
@@ -210,9 +211,15 @@ We are planning a more dynamic mechanism of lens coercion in future releases.
 However, as long as the target is a hash-ref or array-ref, L<Data::Focus::Lens::HashArray::Index> will always be used for coercion,
 i.e., the above example is guaranteed to work.
 
-=head2 Traversals and Focal Points
+=head2 Traversals
 
-As you might already notice, a lens can focus on more than one data parts.
+As you might already notice, a lens can have more than one focal points. This is like slices and traversals.
+
+To obtain all elements at the focal points, use C<list()> method.
+
+    my $target = ["a", "b", "c"];
+    my @abc = focus($target)->list([0, 1, 2]);
+
 
 
 =head2 Lens Composition

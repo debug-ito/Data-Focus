@@ -37,4 +37,12 @@ use Data::Focus::Lens::HashArray::Index;
     is_deeply $target, ["hoge", {foo => "buzz"}];
 }
 
+{
+    note("--- example slices");
+    my $target = ["a", "b", "c"];
+    my @abc = focus($target)->list([0, 1, 2]);
+
+    is_deeply \@abc, ["a", "b", "c"];
+}
+
 done_testing;
