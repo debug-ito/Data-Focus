@@ -66,7 +66,7 @@ Apply C<$part_mapper> to C<@parts>.
 
 =item 3.
 
-Collect ALL C<@f_parts_after> together to build the result. To unwrap L<Data::Focus::Applicative> wrappers of C<@f_parts_after>, we use C<build()> method.
+Collect all C<@f_parts_after> together to build the result. To unwrap L<Data::Focus::Applicative> wrappers of C<@f_parts_after>, we use C<build()> method.
 
     $f_whole_after = $applicative_class->build(sub {
         my (@parts_after) = @_;

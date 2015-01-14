@@ -48,10 +48,6 @@ B<< Internal use only. >>
 
 Create the finest C<$part_mapper> for L<Data::Focus::Lens>.
 
-In Haskell, this method is like
-
-    create_part_mapper :: Applicative f => (a -> b) -> (a -> f b)
-
 C<$updater> is a code-ref. This code-ref is supposed to modify the finest part and return the result.
 Subclasses may or may not use C<$updater> to create C<$part_mapper>.
 
@@ -66,6 +62,10 @@ In pseudo-Haskell, C<build()> method is equivalent to
         (p:ps) -> builder <$> p <*> (ps !! 0) <*> (ps !! 1) ...
 
 I think this is the only pattern where applicative functors are used in Lens implementations.
+
+The signature of C<create_part_mapper()> method is
+
+    create_part_mapper :: Applicative f => (a -> b) -> (a -> f b)
 
 
 =head1 AUTHOR

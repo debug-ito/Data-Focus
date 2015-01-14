@@ -108,7 +108,27 @@ Data::Focus - generic getter/setter/traverser for complex data structures
 
 =head1 SYNOPSIS
 
-TODO
+    use Data::Focus qw(focus);
+
+    my $target = [
+        "hoge",
+        {
+            foo => "bar",
+            quux => ["x", "y", "z"]
+        }
+    ];
+
+    my $z = focus($target)->get(1, "quux", 2);
+    my @xyz = focus($target)->list(1, "quux", [0,1,2]);
+    ## $z == "z"
+    ## @xyz == qw(x y z)
+
+    focus($target)->set(1, "foo",  10);
+    focus($target)->set(1, "quux", 11);
+    ## $target == ["hoge", {foo => 10, quux => 11}]
+
+    focus($target)->over(1, ["foo", "quux"], sub { $_[0] * $_[0] });
+    ## $target == ["hoge", {foo => 100, quux => 121}]
 
 =head1 DESCRIPTION
 
@@ -220,9 +240,23 @@ To obtain all elements at the focal points, use C<list()> method.
     my $target = ["a", "b", "c"];
     my @abc = focus($target)->list([0, 1, 2]);
 
-
+Sometimes a lens has no focal point.
+In that case, you cannot set value to the target.
 
 =head2 Lens Composition
+
+You can compose two lenses to create a composite lens by C<"."> operator.
+
+    my $target = ["hoge", { foo => "bar" }];
+    my $lens_1   = Data::Focus::Lens::HashArray::Index->new(index => 1);
+    my $lens_foo = Data::Focus::Lens::HashArray::Index->new(index => "foo");
+
+    my $composite = $lens_1 . $lens_foo;
+
+    my $part = focus($target)->get($composite);
+    focus($target)->set($composite, "buzz");
+
+To compose two or more lenses at once, use L<Data::Focus::Lens::Composite>.
 
 =head1 EXPORTABLE FUNCTIONS
 
@@ -243,7 +277,12 @@ The constructor. Fields in C<%args> are:
 
 =item C<target> => SCALAR (mandatory)
 
+The target object it focuses into.
+
 =item C<lens> => LENS or ARRAYREF_OF_LENSES (optional)
+
+A lens or an array-ref of lenses used for focusing.
+If some of the lenses are not L<Data::Focus::Lens> objects, they are coerced. See L</Lens Coercion> for detail.
 
 =back
 
@@ -262,18 +301,18 @@ Focus more deeply with the given C<@lenses> and return the L<Data::Focus> object
 
 C<$deeper_focused> is a new L<Data::Focus> object. C<$focused> remains unchanged.
 
-For example, these lines do exactly the same thing.
-
-    $result = $focused->into("foo", "bar")->get();
-    $result = $focused->into("foo")->get("bar");
-    $result = $focused->get("foo", "bar");
+    my $result1 = $focused->into("foo", "bar")->get();
+    my $result2 = $focused->into("foo")->get("bar");
+    my $result3 = $focused->get("foo", "bar");
+    
+    ## $result1 == $result2 == $result3
 
 =head2 $datum = $focused->get(@lenses)
 
 Get the focused C<$datum>.
 
 The arguments C<@lenses> are optional.
-If supplied, C<@lenses> are used to focus more deeply into the C<$focused> to return C<$datum>.
+If supplied, C<@lenses> are used to focus more deeply into the target to return C<$datum>.
 
 If it focuses on nothing (zero focal point), it returns C<undef>.
 
@@ -284,7 +323,7 @@ If it focuses on more than one values (multiple focal points), it returns the fi
 Get the focused C<@data>.
 
 The arguments C<@lenses> are optional.
-If supplied, C<@lenses> are used to focus more deeply into the C<$focused> to return C<@data>.
+If supplied, C<@lenses> are used to focus more deeply into the target to return C<@data>.
 
 If it focuses on nothing (zero focal point), it returns an empty list.
 
@@ -292,37 +331,81 @@ If it focuses on more than one values (multiple focal points), it returns all of
 
 =head2 $modified_target = $focused->set(@lenses, $datum)
 
-Set the focused value of the target to C<$datum>, and return the C<$modified_target>.
+Set the value of the focused element to C<$datum>, and return the C<$modified_target>.
 
 The arguments C<@lenses> are optional.
-If supplied, C<@lenses> are used to focus more deeply into the C<$focused> to set the C<$datum>.
+If supplied, C<@lenses> are used to focus more deeply into the target.
 
-If it focuses on nothing (zero focal point), it modifies nothing. C<$modified_target> is exactly the same as the target object.
+If it focuses on nothing (zero focal point), it modifies nothing.
+C<$modified_target> is usually the same instance as the target, or its clone (it depends on the lenses used).
 
 If it focuses on more than one values (multiple focal points), it sets all of them to C<$datum>.
 
 =head2 $modified_target = $focused->over(@lenses, $updater)
 
-Update the focused value of the target by C<$updater>, and return the C<$modified_target>.
+Update the value of the focused element by C<$updater>, and return the C<$modified_target>.
 
 The arguments C<@lenses> are optional.
-If supplied, C<@lenses> are used to focus more deeply into the C<$focused> to execute C<$updater>.
+If supplied, C<@lenses> are used to focus more deeply into the target.
 
 C<$updater> is a code-ref. It is called like
 
     $modified_datum = $updater->($focused_datum)
 
-where C<$focused_datum> is a datum in the target focused by the lenses.
+where C<$focused_datum> is a datum at one of the focal points in the target.
 C<$modified_datum> replaces the C<$focused_datum> in the C<$modified_target>.
 
-If it focuses on nothing (zero focal point), C<$updater> is never called. C<$modified_target> is exactly the same as the target object.
+If it focuses on nothing (zero focal point), C<$updater> is never called.
+C<$modified_target> is usually the same instance as the target, or its clone (it depends on the lenses used).
 
 If it focuses on more than one values (multiple focal points), C<$updater> is repeatedly called for each of them.
-So C<$updater> should not have side-effects.
 
 =head1 HOW TO CREATE A LENS
 
+To create your own lens, you have to write a subclass of L<Data::Focus::Lens> that implements its abstract methods.
+However, B<< writing your own Lens class from scratch is currently discouraged. >>
+Instead we recommend using L<Data::Focus::LensMaker>.
+
+L<Data::Focus::LensTester> provides some common tests for lenses.
+
 =head1 RELATIONSHIP TO HASKELL
+
+L<Data::Focus>'s API and implementation are based on Haskell packages L<lens-family-core|http://hackage.haskell.org/package/lens-family-core>
+and L<lens|http://hackage.haskell.org/package/lens>.
+
+For those familiar with Haskell's lens libraries, here is the Haskell-to-Perl mapping of terminology.
+
+=over
+
+=item C<Traversal>
+
+The C<Traversal> type corrensponds to L<Data::Focus::Lens>. Currently there's no strict counterpart for C<Lens>, C<Prism> or C<Iso> type.
+
+=item C<< ^. >>
+
+No counterpart in L<Data::Focus>.
+
+=item C<< ^? >>
+
+C<get()> method of L<Data::Focus>.
+
+=item C<< ^.. >>
+
+C<list()> method of L<Data::Focus>.
+
+=item C<< .~ >>
+
+C<set()> method of L<Data::Focus>.
+
+=item C<< %~ >>
+
+C<over()> method of L<Data::Focus>.
+
+=item C<Applicative>
+
+C<Applicative> typeclass corrensponds to L<Data::Focus::Applicative>.
+
+=back
 
 =head1 SEE ALSO
 
