@@ -67,7 +67,7 @@ foreach my $case (
 ) {
     foreach my $immutable (0, 1) {
         my $lens = Data::Focus::Lens::HashArray::Index->new(
-            key => $case->{key}, immutable => $immutable
+            index => $case->{key}, immutable => $immutable
         );
         my $label = make_label($case->{target}, $case->{key}, $immutable);
         subtest $label => sub {
@@ -99,7 +99,7 @@ foreach my $case (
 ) {
     foreach my $immutable (0, 1) {
         my $lens = Data::Focus::Lens::HashArray::Index->new(
-            key => $case->{key}, immutable => $immutable
+            index => $case->{key}, immutable => $immutable
         );
         my $label = make_label($case->{target}, $case->{key}, $immutable);
         my %test_args = (

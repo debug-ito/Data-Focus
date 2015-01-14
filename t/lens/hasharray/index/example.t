@@ -5,7 +5,7 @@ use Data::Focus qw(focus);
 use Data::Focus::Lens::HashArray::Index;
 
 
-sub lens { Data::Focus::Lens::HashArray::Index->new(key => $_[0]) }
+sub lens { Data::Focus::Lens::HashArray::Index->new(index => $_[0]) }
 
 my $target = {
     foo => "bar",

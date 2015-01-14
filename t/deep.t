@@ -6,7 +6,7 @@ use Data::Focus qw(focus);
 use Data::Focus::Lens::HashArray::Index;
 
 sub lens {
-    return Data::Focus::Lens::HashArray::Index->new(key => shift);
+    return Data::Focus::Lens::HashArray::Index->new(index => shift);
 }
 
 sub level {

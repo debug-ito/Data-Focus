@@ -40,7 +40,7 @@ sub coerce_to_lens {
         return $maybe_lens;
     }else {
         require Data::Focus::Lens::HashArray::Index;
-        return Data::Focus::Lens::HashArray::Index->new(key => $maybe_lens); ## default lens (for now)
+        return Data::Focus::Lens::HashArray::Index->new(index => $maybe_lens); ## default lens (for now)
     }
 }
 
@@ -157,8 +157,8 @@ With L<Data::Focus> we can rewrite the above example to:
     use Data::Focus::Lens::HashArray::Index;
     
     my $target = ["hoge", { foo => "bar" }];
-    my $lens_1   = Data::Focus::Lens::HashArray::Index->new(key => 1);
-    my $lens_foo = Data::Focus::Lens::HashArray::Index->new(key => "foo");
+    my $lens_1   = Data::Focus::Lens::HashArray::Index->new(index => 1);
+    my $lens_foo = Data::Focus::Lens::HashArray::Index->new(index => "foo");
     my $part = focus($target)->get($lens_1, $lens_foo);
     focus($target)->set($lens_1, $lens_foo, "buzz");
 
@@ -198,7 +198,7 @@ All Data::Focus::HashArray::* modules optionally support immutable update. See i
 If you pass something that's not a L<Data::Focus::Lens> object to L<Data::Focus>'s methods,
 it is coerced (cast) to a lens.
 
-Currently, the passed value is treated as the C<key> argument of L<Data::Focus::Lens::HashArray::Index>'s constructor.
+Currently, the passed value is treated as the C<index> argument of L<Data::Focus::Lens::HashArray::Index>'s constructor.
 This means we can rewrite the above example to:
 
     use Data::Focus qw(focus);

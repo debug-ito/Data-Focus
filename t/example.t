@@ -17,8 +17,8 @@ use Data::Focus::Lens::HashArray::Index;
 {
     note("--- example with lens");
     my $target = ["hoge", { foo => "bar" }];
-    my $lens_1   = Data::Focus::Lens::HashArray::Index->new(key => 1);
-    my $lens_foo = Data::Focus::Lens::HashArray::Index->new(key => "foo");
+    my $lens_1   = Data::Focus::Lens::HashArray::Index->new(index => 1);
+    my $lens_foo = Data::Focus::Lens::HashArray::Index->new(index => "foo");
     my $part = focus($target)->get($lens_1, $lens_foo);
     focus($target)->set($lens_1, $lens_foo, "buzz");
 

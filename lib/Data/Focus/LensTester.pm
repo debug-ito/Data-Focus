@@ -134,7 +134,7 @@ Data::Focus::LensTester - tester for Lens implementations
     };
     
     my $lens = Data::Focus::Lens::HashArray::Index->new(
-        key => "foo"
+        index => "foo"
     );
     
     $tester->test_lens_laws(

@@ -6,7 +6,7 @@ use Data::Focus::Lens::HashArray::Index;
 
 note("--- deep autovivification");
 
-my @lenses = map { Data::Focus::Lens::HashArray::Index->new(key => $_) }
+my @lenses = map { Data::Focus::Lens::HashArray::Index->new(index => $_) }
     "hoge", [1,2,4], ["a", "b", "c"], "foo";
 
 is focus(undef)->get(@lenses), undef, "get()";

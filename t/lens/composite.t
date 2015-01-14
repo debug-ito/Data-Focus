@@ -6,8 +6,7 @@ use Data::Focus::Lens::HashArray::Index;
 use Data::Focus::Lens::Composite;
 
 sub lens {
-    my ($key) = @_;
-    Data::Focus::Lens::HashArray::Index->new(key => $key);
+    Data::Focus::Lens::HashArray::Index->new(index => shift);
 }
 
 my $target = {

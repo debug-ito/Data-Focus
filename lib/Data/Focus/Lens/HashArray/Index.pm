@@ -9,18 +9,18 @@ our @CARP_NOT = qw(Data::Focus::Lens Data::Focus);
 
 sub new {
     my ($class, %args) = @_;
-    my $keys = [];
-    if(exists($args{key})) {
-        if(ref($args{key}) eq "ARRAY") {
-            $keys = $args{key};
+    my $indices = [];
+    if(exists($args{index})) {
+        if(ref($args{index}) eq "ARRAY") {
+            $indices = $args{index};
         }else {
-            $keys = [$args{key}];
+            $indices = [$args{index}];
         }
     }
-    croak "key must be mandatory" if !@$keys;
-    croak "key must be defined" if grep { !defined($_) } @$keys;
+    croak "index must be mandatory" if !@$indices;
+    croak "index must be defined" if grep { !defined($_) } @$indices;
     my $self = bless {
-        keys => $keys,
+        indices => $indices,
         immutable => $args{immutable},
     }, $class;
     return $self;
@@ -31,12 +31,12 @@ sub _getter {
     my $type = ref($whole);
     if(!defined($whole)) {
         ## slots for autovivification
-        return map { undef } @{$self->{keys}};
+        return map { undef } @{$self->{indices}};
     }elsif($type eq "ARRAY") {
-        my @indices = map { int($_) } @{$self->{keys}};
+        my @indices = map { int($_) } @{$self->{indices}};
         return @{$whole}[@indices];
     }elsif($type eq "HASH") {
-        return @{$whole}{@{$self->{keys}}};
+        return @{$whole}{@{$self->{indices}}};
     }else {
         ## no slot. cannot set.
         return ();
@@ -48,17 +48,17 @@ sub _setter {
     return $whole if !@parts;
     if(!defined($whole)) {
         ## autovivifying
-        if(grep { $_ !~ /^\d+$/ } @{$self->{keys}}) {
-            return +{ map { $self->{keys}[$_] => $parts[$_] } 0 .. $#{$self->{keys}} };
+        if(grep { $_ !~ /^\d+$/ } @{$self->{indices}}) {
+            return +{ map { $self->{indices}[$_] => $parts[$_] } 0 .. $#{$self->{indices}} };
         }else {
             my $ret = [];
-            $ret->[$self->{keys}[$_]] = $parts[$_] foreach 0 .. $#{$self->{keys}};
+            $ret->[$self->{indices}[$_]] = $parts[$_] foreach 0 .. $#{$self->{indices}};
             return $ret;
         }
     }
     my $type = ref($whole);
     if($type eq "ARRAY") {
-        my @indices = map { int($_) } @{$self->{keys}};
+        my @indices = map { int($_) } @{$self->{indices}};
         my $ret = $self->{immutable} ? [@$whole] : $whole;
         foreach my $i (0 .. $#indices) {
             my $index = $indices[$i];
@@ -68,7 +68,7 @@ sub _setter {
         return $ret;
     }elsif($type eq "HASH") {
         my $ret = $self->{immutable} ? {%$whole} : $whole;
-        $ret->{$self->{keys}[$_]} = $parts[$_] foreach 0 .. $#{$self->{keys}};
+        $ret->{$self->{indices}[$_]} = $parts[$_] foreach 0 .. $#{$self->{indices}};
         return $ret;
     }else {
         confess "This should not be executed because the getter should return an empty list.";
@@ -92,7 +92,7 @@ Data::Focus::Lens::HashArray::Index - a lens to focus on element(s) of hash/arra
     use Data::Focus qw(focus);
     use Data::Focus::Lens::HashArray::Index;
     
-    sub lens { Data::Focus::Lens::HashArray::Index->new(key => $_[0]) }
+    sub lens { Data::Focus::Lens::HashArray::Index->new(index => $_[0]) }
     
     my $target = {
         foo => "bar",
@@ -112,8 +112,8 @@ which focuses on one or more elements in a hash or array.
 
 Conceptually, this lens does the same as hash/array dereferences and slices.
 
-    $hash->{key}
-    @{$hash}{"key1", "key2", "key3"}
+    $hash->{index}
+    @{$hash}{"index1", "index2", "index3"}
     $array->[4]
     @{$array}[3,4,5]
 
@@ -133,7 +133,7 @@ It returns C<undef> for non-existent keys. You can set values to them.
 =head2 ARRAY target
 
 If the target is an array-ref, this lens behaves as array dereference and slice.
-The keys are cast to integers.
+The indices are cast to integers.
 
 Positive out-of-range indices are allowed.
 C<get()> and C<list()> return C<undef> for those indices.
@@ -154,7 +154,7 @@ If different values are set to those indices, only the last one takes effect.
 
 When reading, it always returns C<undef>.
 
-When writing, it autovivifies an array-ref if and only if the keys are all non-negative integers.
+When writing, it autovivifies an array-ref if and only if the indices are all non-negative integers.
 Otherwise, it autovivifies a hash-ref.
 
 =head2 other targets
@@ -171,9 +171,9 @@ The constructor. Fields in C<%args> are:
 
 =over
 
-=item C<key> => STR or ARRAYREF_OF_THEM (mandatory)
+=item C<index> => STR or ARRAYREF_OF_THEM (mandatory)
 
-Key to focus. When you specify an array-ref, the C<$lens> behaves like slice.
+Index to focus. When you specify an array-ref, the C<$lens> behaves like slice.
 
 =item C<immutable> => BOOL (optional, default: false)
 
@@ -191,6 +191,5 @@ See L<Data::Focus::Lens>.
 =head1 AUTHOR
  
 Toshio Ito, C<< <toshioito at cpan.org> >>
-
 
 =cut

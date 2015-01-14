@@ -36,13 +36,13 @@ my $target = gen_target();
 
 my $result = focus($target)->set(
     Data::Focus::Lens::HashArray::Index->new(
-        key => [0, 1], immutable => 1
+        index => [0, 1], immutable => 1
     ),
     Data::Focus::Lens::HashArray::Index->new(
-        key => ["a", "num"], immutable => 1
+        index => ["a", "num"], immutable => 1
     ),
     Data::Focus::Lens::HashArray::Index->new(
-        key => 2, immutable => 1
+        index => 2, immutable => 1
     ),
     "XXX"
 );

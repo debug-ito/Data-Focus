@@ -5,9 +5,9 @@ use Data::Focus qw(focus);
 use Data::Focus::Lens::HashArray::Index;
 
 sub set_multi {
-    my ($target, $keys, $vals_ref) = @_;
+    my ($target, $indices, $vals_ref) = @_;
     my @vals = @$vals_ref;
-    my $lens = Data::Focus::Lens::HashArray::Index->new(key => $keys);
+    my $lens = Data::Focus::Lens::HashArray::Index->new(index => $indices);
     my @over_arg = ();
     my $ret = focus($target)->over($lens, sub {
         push @over_arg, shift;

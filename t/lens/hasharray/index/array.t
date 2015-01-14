@@ -9,7 +9,7 @@ note("edges cases for array targets");
 
 {
     my $target = [0,1,2,3];
-    my $lens = Data::Focus::Lens::HashArray::Index->new(key => -10);
+    my $lens = Data::Focus::Lens::HashArray::Index->new(index => -10);
     like(
         exception { focus($target)->set($lens, 10) },
         qr/negative out-of-range index/i,
@@ -20,7 +20,7 @@ note("edges cases for array targets");
 {
     my @warns = ();
     local $SIG{__WARN__} = sub { push @warns, $_[0] };
-    my $lens = Data::Focus::Lens::HashArray::Index->new(key => "str");
+    my $lens = Data::Focus::Lens::HashArray::Index->new(index => "str");
     my $got = focus([0,1,2,3])->set($lens, "AAA");
     is_deeply $got, ["AAA", 1,2,3], "string index cast to 0";
     note("warns:");

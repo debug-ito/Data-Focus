@@ -9,8 +9,8 @@ use testlib::SampleObject;
 use testlib::Identity qw(identical);
 
 sub lens {
-    my ($key, $immutable) = @_;
-    return Data::Focus::Lens::HashArray::Index->new(key => $key, immutable => $immutable);
+    my ($index, $immutable) = @_;
+    return Data::Focus::Lens::HashArray::Index->new(index => $index, immutable => $immutable);
 }
 
 sub make_label {
