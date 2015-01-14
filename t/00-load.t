@@ -8,8 +8,9 @@ BEGIN {
         "",
         "::Applicative", "::Applicative::Identity", "::Applicative::Const",
         "::Applicative::Const::First", "::Applicative::Const::List",
-        "::Lens", "::Lens::HashArray::Index",
-        "::LensTester",
+        "::Lens", "::Lens::Composite", "::Lens::HashArray::Index",
+        "::Lens::HashArray::All", "::Lens::HashArray::Recurse",
+        "::LensTester", "::LensMaker",
     ) {
         use_ok( "Data::Focus$name" );
     }
