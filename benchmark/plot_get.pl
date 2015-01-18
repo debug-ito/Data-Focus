@@ -10,14 +10,15 @@ use JSON qw(decode_json);
 sub usage { pod2usage(-verbose => 2, -noperldoc => 1) }
 
 GetOptions(
-    "h|help" => \&usage
+    "h|help" => \&usage,
+    "base-key=s" => \(my $base_key = "direct"),
 );
 
 my $result_str = do { local $/; <> };
 my $result = decode_json($result_str);
 my $base_count = do {
     my ($min_level) = sort {$a <=> $b} keys %$result;
-    $result->{$min_level}{direct};
+    $result->{$min_level}{$base_key};
 };
 my @datasets = map {
     my $key = $_;
@@ -52,7 +53,21 @@ plot_get.pl - plot the result of get.pl
 =head1 SYNOPSIS
 
     $ get.pl 1 10 20 > result.json
-    $ plot_get.pl result.json
+    $ plot_get.pl [OPTION] result.json
+
+=head1 OPTIONS
+
+=over
+
+=item --base-key KEY
+
+The entry key whose data is used as the base. Default: "direct".
+
+=item -h, --help
+
+Show this message.
+
+=back
 
 =head1 AUTHOR
 
