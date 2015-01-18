@@ -1,4 +1,6 @@
 use v5.10.0;
+use Pod::Usage;
+use Getopt::Long qw(:config no_ignore_case bundling);
 use strict;
 use warnings;
 use Benchmark qw(timethese);
@@ -7,6 +9,10 @@ use Data::Focus::Lens::HashArray::Index;
 use Data::Focus::Lens::HashArray::All;
 use Data::Diver qw(Dive);
 use JSON qw(encode_json);
+
+GetOptions(
+    "h|help" => sub { pod2usage(-verbose => 2, -noperldoc => 1) }
+);
 
 my $ALL_LENS = Data::Focus::Lens::HashArray::All->new;
 
@@ -57,3 +63,21 @@ foreach my $level (1, 10, 25, 50){
 }
 
 print encode_json(\%results);
+
+__END__
+
+=pod
+
+=head1 NAME
+
+get.pl - benchmark for getting an element from a deeply nested structure.
+
+=head1 SYNOPSIS
+
+    $ get.pl > result.json
+
+=head1 AUTHOR
+
+Toshio Ito
+
+=cut
