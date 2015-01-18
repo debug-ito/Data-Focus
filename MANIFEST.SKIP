@@ -8,6 +8,7 @@
 ^MANIFEST\.
 ^README\.pod$
 ^\.proverc$
+^benchmark
 
 # Avoid version control files.
 \bRCS\b
