@@ -1,10 +1,14 @@
 use v5.10.0;
 use strict;
 use warnings;
-use Benchmark qw(cmpthese);
+use Benchmark qw(timethese);
 use Data::Focus qw(focus);
 use Data::Focus::Lens::HashArray::Index;
+use Data::Focus::Lens::HashArray::All;
 use Data::Diver qw(Dive);
+use JSON qw(encode_json);
+
+my $ALL_LENS = Data::Focus::Lens::HashArray::All->new;
 
 sub create_nested_arrays {
     my ($level) = @_;
@@ -31,16 +35,25 @@ sub create_focus_accessor {
     return sub { focus($_[0])->get((0) x $level) };
 }
 
-foreach my $level (1, 10, 50){
+my %results = ();
+
+foreach my $level (1, 10, 25, 50){
+    local *STDOUT = *STDERR;
     my %accessors = map {
         my $accessor_maker = do { no strict "refs"; \&{"create_${_}_accessor"} };
         ($_ => $accessor_maker->($level))
     } qw(direct diver focus);
     my $target = create_nested_arrays($level);
-    say "### level $level";
-    say "$_: " . $accessors{$_}->($target) foreach keys %accessors;
-    cmpthese(-3, {map {
+    foreach my $name (keys %accessors) {
+        my $val = $accessors{$name}->($target);
+        die "$name returns a wrong value: $val" if $val ne "a";
+    }
+    my $result_for_level = timethese(-3, {map {
         my $key = $_;
         ($key => sub { my $x = $accessors{$key}->($target) })
     } keys %accessors});
+    
+    $results{$level} = focus($result_for_level)->over($ALL_LENS, sub { $_[0]->iters });
 }
+
+print encode_json(\%results);
