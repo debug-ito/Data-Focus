@@ -8,13 +8,36 @@ use Data::Focus::Lens::HashArray::Index;
 note("edges cases for array targets");
 
 {
+    foreach my $immutable (0, 1) {
+        foreach my $case (
+            {label => "single", index => -10},
+            {label => "boundary", index => -5},
+            {label => "slice", index => [0, 2, -5, 3]},
+        ) {
+            my $target = [0,1,2,3];
+            my $lens = Data::Focus::Lens::HashArray::Index->new(
+                index => $case->{index},
+                immutable => $immutable
+            );
+            my $label = "$case->{label}, immutable=$immutable";
+            like(
+                exception { focus($target)->set($lens, 10) },
+                qr/negative out-of-range index/i,
+                "$label: set to negative out-of-range index raises an exception"
+            );
+        }
+    }
+}
+
+{
     my $target = [0,1,2,3];
-    my $lens = Data::Focus::Lens::HashArray::Index->new(index => -10);
-    like(
-        exception { focus($target)->set($lens, 10) },
-        qr/negative out-of-range index/i,
-        "set to negative out-of-range index raises an exception"
+    my $lens = Data::Focus::Lens::HashArray::Index->new(index => -4);
+    is(
+        exception { focus($target)->set($lens, "zero") },
+        undef,
+        "index -4 is negative in-range index, so it's ok"
     );
+    is_deeply $target, ["zero", 1, 2, 3];
 }
 
 {
