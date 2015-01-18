@@ -10,8 +10,10 @@ use Data::Focus::Lens::HashArray::All;
 use Data::Diver qw(Dive);
 use JSON qw(encode_json);
 
+sub usage { pod2usage(-verbose => 2, -noperldoc => 1) }
+
 GetOptions(
-    "h|help" => sub { pod2usage(-verbose => 2, -noperldoc => 1) }
+    "h|help" => \&usage,
 );
 
 my $ALL_LENS = Data::Focus::Lens::HashArray::All->new;
@@ -42,8 +44,10 @@ sub create_focus_accessor {
 }
 
 my %results = ();
+my @levels = @ARGV;
+usage if !@levels;
 
-foreach my $level (1, 10, 25, 50){
+foreach my $level (@levels){
     local *STDOUT = *STDERR;
     my %accessors = map {
         my $accessor_maker = do { no strict "refs"; \&{"create_${_}_accessor"} };
@@ -74,7 +78,9 @@ get.pl - benchmark for getting an element from a deeply nested structure.
 
 =head1 SYNOPSIS
 
-    $ get.pl > result.json
+    $ get.pl NEST_LEVELS
+    
+    $ get.pl 1 10 30 > result.json
 
 =head1 AUTHOR
 
