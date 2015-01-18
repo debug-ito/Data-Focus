@@ -30,7 +30,7 @@ my @datasets = map {
             $writer->("$level $val\n");
         }
     });
-} qw(direct diver focus);
+} qw(direct diver focus focus_lens);
 
 my $script = gscript(
     key => "autotitle columnhead",

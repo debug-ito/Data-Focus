@@ -18,6 +18,7 @@ GetOptions(
 );
 
 my $ALL_LENS = Data::Focus::Lens::HashArray::All->new;
+my $ZERO_LENS = Data::Focus::Lens::HashArray::Index->new(index => 0);
 
 sub create_nested_arrays {
     my ($level) = @_;
@@ -44,6 +45,11 @@ sub create_focus_accessor {
     return sub { focus($_[0])->get((0) x $level) };
 }
 
+sub create_focus_lens_accessor {
+    my ($level) = @_;
+    return sub { focus($_[0])->get(($ZERO_LENS) x $level) };
+}
+
 my %results = ();
 my @levels = @ARGV;
 usage if !@levels;
@@ -53,7 +59,7 @@ foreach my $level (@levels){
     my %accessors = map {
         my $accessor_maker = do { no strict "refs"; \&{"create_${_}_accessor"} };
         ($_ => $accessor_maker->($level))
-    } qw(direct diver focus);
+    } qw(direct diver focus focus_lens);
     my $target = create_nested_arrays($level);
     foreach my $name (keys %accessors) {
         my $val = $accessors{$name}->($target);
