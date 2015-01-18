@@ -1,3 +1,4 @@
+#!/usr/bin/env perl
 use v5.10.0;
 use Pod::Usage;
 use Getopt::Long qw(:config no_ignore_case bundling);
