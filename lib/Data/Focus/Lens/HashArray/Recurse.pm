@@ -76,7 +76,7 @@ Data::Focus::Lens::HashArray::Recurse - recursively traverse a tree of hashes an
     
     my $result = focus($target)->over($lens, sub { $_[0] * 100 });
     
-    ## $result is:
+    ## $result:
     ## [
     ##     {foo => 100, bar => 200},
     ##     300,
@@ -113,7 +113,7 @@ This means every updating operation using the C<$lens> creates a new hash/array 
 
 =head1 OBJECT METHODS
 
-=head2 apply
+=head2 apply_lens
 
 See L<Data::Focus::Lens>.
 

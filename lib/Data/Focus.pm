@@ -120,15 +120,15 @@ Data::Focus - generic getter/setter/traverser for complex data structures
 
     my $z = focus($target)->get(1, "quux", 2);
     my @xyz = focus($target)->list(1, "quux", [0,1,2]);
-    ## $z == "z"
-    ## @xyz == qw(x y z)
+    ## $z: "z"
+    ## @xyz: qw(x y z)
 
     focus($target)->set(1, "foo",  10);
     focus($target)->set(1, "quux", 11);
-    ## $target == ["hoge", {foo => 10, quux => 11}]
+    ## $target: ["hoge", {foo => 10, quux => 11}]
 
     focus($target)->over(1, ["foo", "quux"], sub { $_[0] * $_[0] });
-    ## $target == ["hoge", {foo => 100, quux => 121}]
+    ## $target: ["hoge", {foo => 100, quux => 121}]
 
 =head1 DESCRIPTION
 
@@ -381,23 +381,23 @@ For those familiar with Haskell's lens libraries, here is the Haskell-to-Perl ma
 
 The C<Traversal> type corrensponds to L<Data::Focus::Lens>. Currently there's no strict counterpart for C<Lens>, C<Prism> or C<Iso> type.
 
-=item C<< ^. >>
+=item C<< (^.) >>
 
 No counterpart in L<Data::Focus>.
 
-=item C<< ^? >>
+=item C<< (^?) >>
 
 C<get()> method of L<Data::Focus>.
 
-=item C<< ^.. >>
+=item C<< (^..) >>
 
 C<list()> method of L<Data::Focus>.
 
-=item C<< .~ >>
+=item C<< (.~) >>
 
 C<set()> method of L<Data::Focus>.
 
-=item C<< %~ >>
+=item C<< (%~) >>
 
 C<over()> method of L<Data::Focus>.
 

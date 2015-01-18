@@ -102,7 +102,7 @@ This means every updating operation using the C<$lens> creates a new hash/array 
 
 =head1 OBJECT METHODS
 
-=head2 apply
+=head2 apply_lens
 
 See L<Data::Focus::Lens>.
 

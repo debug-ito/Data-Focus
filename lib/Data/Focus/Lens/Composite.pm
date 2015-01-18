@@ -71,7 +71,7 @@ If C<@lenses> is empty, it returns a no-op lens.
 
 =head1 OBJECT METHODS
 
-=head2 apply
+=head2 apply_lens
 
 See L<Data::Focus::Lens>.
 

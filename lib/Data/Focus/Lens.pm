@@ -35,7 +35,7 @@ All lens implementations must implement the following methods.
 Apply the C<$lens> and the C<$part_mapper> to C<$whole_before>, and obtain the result (C<$f_whole_after>).
 
 C<$applicative_class> is the name of a L<Data::Focus::Applicative> subclass.
-Generally speaking, it defines the "context" in which this lens operation is performed.
+Generally speaking, it specifies the "context" in which this lens operation is performed.
 
 C<$part_mapper> is a code-ref with the following signature.
 

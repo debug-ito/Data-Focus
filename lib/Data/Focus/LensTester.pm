@@ -205,7 +205,7 @@ Consider the following code for example.
     use Data::Dumper;
     
     my $undef;
-    $undef->[0] = $undef->[0];
+    $undef->[0] = $undef->[0]; ## get and set
     print Dumper $undef;
     
     ## => $VAR1 = [

@@ -110,7 +110,7 @@ Data::Focus::Lens::HashArray::Index - a lens to focus on element(s) of hash/arra
 This is an implementation of L<Data::Focus::Lens>,
 which focuses on one or more elements in a hash or array.
 
-Conceptually, this lens does the same as hash/array dereferences and slices.
+Conceptually, this lens does the same as hash/array subscripts and slices.
 
     $hash->{index}
     @{$hash}{"index1", "index2", "index3"}
@@ -123,7 +123,7 @@ Detailed behaviors of this lens are described below for each target type.
 
 =head2 HASH target
 
-If the target is a hash-ref, this lens behaves as hash dereference and slice.
+If the target is a hash-ref, this lens behaves as its subscript or slice.
 
 Duplicate keys in a slice are allowed.
 If different values are set to those keys, only the last one takes effect.
@@ -132,7 +132,7 @@ It returns C<undef> for non-existent keys. You can set values to them.
 
 =head2 ARRAY target
 
-If the target is an array-ref, this lens behaves as array dereference and slice.
+If the target is an array-ref, this lens behaves as its subscript and slice.
 The indices are cast to integers.
 
 Positive out-of-range indices are allowed.
@@ -184,7 +184,7 @@ This means every updating operation using the C<$lens> creates a new hash/array 
 
 =head1 OBJECT METHODS
 
-=head2 apply
+=head2 apply_lens
 
 See L<Data::Focus::Lens>.
 

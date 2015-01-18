@@ -57,6 +57,8 @@ See L<Data::Focus::Applicative>.
 
 =head2 $f_datum = Data::Focus::Applicative::Const->new($datum)
 
+The constuctor. The C<$f_datum> keeps C<$datum> inside.
+
 =head2 $monoid = Data::Focus::Applicative::Const->mempty()
 
 Must be implemented in subclasses.
@@ -68,6 +70,8 @@ Must be implemented in subclasses.
 =head1 OBJECT METHODS
 
 =head2 $datum = $f_datum->get_const()
+
+Get the C<$datum> passed in C<new()> method.
 
 =head1 AUTHOR
  

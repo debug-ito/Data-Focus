@@ -89,7 +89,7 @@ The following functions are exported only by request.
 
 =head2 make_lens_from_accessors($getter, $setter)
 
-Generate necessary methods from C<$getter> and C<$setter>, and install them in the calling package.
+Generate necessary methods for a L<Data::Focus::Lens> class from C<$getter> and C<$setter>, and install them in the calling package.
 See L</SYNOPSIS> for usage.
 
 C<$getter> and C<$setter> are code-refs. They are supposed to be getter and setter methods defined in your lens class, respectively.
