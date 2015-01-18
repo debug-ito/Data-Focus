@@ -15,13 +15,18 @@ GetOptions(
 
 my $result_str = do { local $/; <> };
 my $result = decode_json($result_str);
+my $base_count = do {
+    my ($min_level) = sort {$a <=> $b} keys %$result;
+    $result->{$min_level}{direct};
+};
 my @datasets = map {
     my $key = $_;
     gdata(sub {
         my ($d, $writer) = @_;
         $writer->(qq{"$key"\n});
         foreach my $level (sort {$a <=> $b} keys %$result) {
-            $writer->("$level $result->{$level}{$key}\n");
+            my $val = $result->{$level}{$key} / $base_count * 100;
+            $writer->("$level $val\n");
         }
     });
 } qw(direct diver focus);
@@ -29,6 +34,9 @@ my @datasets = map {
 my $script = gscript(
     key => "autotitle columnhead",
     "style data" => "lp",
+)->setq(
+    xlabel => "depth of nest",
+    ylabel => "relative count of iterations [%]",
 );
 
 $script->plot(@datasets);
