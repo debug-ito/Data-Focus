@@ -9,6 +9,7 @@
 ^README\.pod$
 ^\.proverc$
 ^benchmark
+^nytprof
 
 # Avoid version control files.
 \bRCS\b
