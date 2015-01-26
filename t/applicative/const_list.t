@@ -16,7 +16,6 @@ test_functor_basic($c, builder_called => 0);
 test_const_basic($c);
 
 is_deeply($c->pure(100)->get_const, []);
-is_deeply($c->mempty, []);
 
 note("-- mconcat");
 foreach my $case (
@@ -26,7 +25,9 @@ foreach my $case (
     {label => "multi", input => [[], [10], [20,30], [40,50,60], [undef]],
      exp => [10,20,30,40,50,60,undef]},
 ) {
-    is_deeply($c->mconcat(@{$case->{input}}), $case->{exp}, "mconcat: $case->{label}");
+    is_deeply($c->build(sub {}, map { $c->new($_) } @{$case->{input}})->get_const,
+              $case->{exp},
+              "mconcat: $case->{label}");
 }
 
 is_deeply($c->fmap_ap(sub { die "this should not be called" },

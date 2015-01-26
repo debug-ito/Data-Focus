@@ -16,7 +16,6 @@ test_functor_basic($c, builder_called => 0);
 test_const_basic($c);
 
 is($c->pure(10)->get_const, undef);
-is($c->mempty, undef);
 
 note("--- mconcat");
 foreach my $case (
@@ -29,7 +28,7 @@ foreach my $case (
     {label => "multi strings", input => [\("AAA"), \("BBB"), undef], exp => "AAA"},
     {label => "valid undef", input => [undef, \(undef), \("aa")], exp => undef},
 ) {
-    my $ret = $c->mconcat(@{$case->{input}});
+    my $ret = $c->build(sub { }, map { $c->new($_) } @{$case->{input}})->get_const;
     $ret = defined($ret) ? $$ret : undef;
     is_deeply($ret, $case->{exp}, "mconcat: $case->{label}");
 }

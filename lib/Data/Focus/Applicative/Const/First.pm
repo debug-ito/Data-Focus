@@ -3,23 +3,16 @@ use strict;
 use warnings;
 use parent qw(Data::Focus::Applicative::Const);
 
-sub mempty { undef }
-sub mconcat {
-    my $class = shift;
-    my $datum = $class->mempty;
-    while(@_) {
-        $datum = shift;
-        return $datum if defined $datum;
-    }
-    return $datum;
-}
+my $PURE = __PACKAGE__->new(undef);
+
+sub pure { $PURE }
 
 sub build {
     my ($class, $builder, @f_parts) = @_;
     foreach my $f_part (@f_parts) {
         return $f_part if defined($f_part->get_const);
     }
-    return $class->pure();
+    return $PURE;
 }
 
 sub create_part_mapper {
