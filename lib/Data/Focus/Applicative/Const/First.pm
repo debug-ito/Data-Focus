@@ -14,6 +14,14 @@ sub mconcat {
     return $datum;
 }
 
+sub build {
+    my ($class, $builder, @f_parts) = @_;
+    foreach my $f_part (@f_parts) {
+        return $f_part if defined($f_part->get_const);
+    }
+    return $class->pure();
+}
+
 sub create_part_mapper {
     my ($class) = @_;
     return sub { my ($datum) = @_; $class->new(\$datum) };
