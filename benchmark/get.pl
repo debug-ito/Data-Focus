@@ -13,9 +13,12 @@ use JSON qw(encode_json);
 
 sub usage { pod2usage(-verbose => 2, -noperldoc => 1) }
 
+my @bench_cases;
 GetOptions(
     "h|help" => \&usage,
+    "c|case=s" => \@bench_cases,
 );
+@bench_cases = qw(direct diver focus focus_lens) if !@bench_cases;
 
 my $ALL_LENS = Data::Focus::Lens::HashArray::All->new;
 my $ZERO_LENS = Data::Focus::Lens::HashArray::Index->new(index => 0);
@@ -59,7 +62,7 @@ foreach my $level (@levels){
     my %accessors = map {
         my $accessor_maker = do { no strict "refs"; \&{"create_${_}_accessor"} };
         ($_ => $accessor_maker->($level))
-    } qw(direct diver focus focus_lens);
+    } @bench_cases;
     my $target = create_nested_arrays($level);
     foreach my $name (keys %accessors) {
         my $val = $accessors{$name}->($target);
@@ -85,9 +88,21 @@ get.pl - benchmark for getting an element from a deeply nested structure.
 
 =head1 SYNOPSIS
 
-    $ get.pl NEST_LEVELS
+    $ get.pl [OPTIONS] NEST_LEVELS
     
     $ get.pl 1 10 30 > result.json
+
+=head1 OPTIONS
+
+=over
+
+=item -c, --case BENCH_CASE
+
+Specify the case to benchmark. You can specify more than one cases.
+
+BENCH_CASE is one of "direct", "diver", "focus", "focus_lens". By default, it benchmarks all.
+
+=back
 
 =head1 AUTHOR
 
