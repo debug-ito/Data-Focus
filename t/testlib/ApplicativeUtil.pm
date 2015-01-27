@@ -54,7 +54,7 @@ sub test_functor_basic {
     {
         note("--- $c: build() common spec");
         my @args = ();
-        my $pure = $c->build(sub { push @args, \@_ });
+        my $pure = $c->build(sub { push @args, [@_] });
         is scalar(@args), $exp_builder_called, "builder called $exp_builder_called times";
         foreach my $arg (@args) {
             is scalar(@$arg), 0, "0 arg given";
@@ -63,7 +63,7 @@ sub test_functor_basic {
         isa_ok $pure, "Data::Focus::Applicative";
 
         @args = ();
-        my $built = $c->build(sub { push @args, \@_ }, map { $c->pure($_) } 10, 20, 30);
+        my $built = $c->build(sub { push @args, [@_] }, map { $c->pure($_) } 10, 20, 30);
         is scalar(@args), $exp_builder_called, "builder called $exp_builder_called times";
         foreach my $arg (@args) {
             is scalar(@$arg), 3, "3 args given";

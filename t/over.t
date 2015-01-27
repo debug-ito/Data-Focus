@@ -32,7 +32,7 @@ foreach my $case (
     my @lenses = map { lens($_) } @{$case->{keys}};
     my @over_args = ();
     my $got = focus(target())->over(@lenses, sub {
-        push @over_args, \@_;
+        push @over_args, [@_];
         return $_[0];
     });
     my $exp = exists($case->{exp_target}) ? $case->{exp_target} : target();

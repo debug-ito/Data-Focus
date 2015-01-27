@@ -23,7 +23,7 @@ foreach my $case (
     is $f->get, $case->{target}, "$case->{label}: set() not modifying target";
 
     my @args = ();
-    is $f->over(sub { push @args, \@_; "FOOBAR" }), "FOOBAR", "$case->{label}: over() result";
+    is $f->over(sub { push @args, [@_]; "FOOBAR" }), "FOOBAR", "$case->{label}: over() result";
     is $f->get, $case->{target}, "$case->{label}: over() not modifying target";
     is scalar(@args), 1, "$case->{label}: updater called once";
     is_deeply $args[0], [$case->{target}], "$case->{label}: updater argments";
@@ -48,7 +48,7 @@ foreach my $case (
     identical $f->get, $t, "$case->{label}: set() not modifying the target";
 
     my @args = ();
-    is $f->over(sub { push @args, \@_; "FOOBAR" }), "FOOBAR", "$case->{label}: over() result";
+    is $f->over(sub { push @args, [@_]; "FOOBAR" }), "FOOBAR", "$case->{label}: over() result";
     identical $f->get, $t, "$case->{label}: over() not modifying target";
     is scalar(@args), 1, "$case->{label}: updater called once";
     identical $args[0][0], $t, "$case->{label}: updater argments";
