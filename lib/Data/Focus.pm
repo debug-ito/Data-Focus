@@ -36,7 +36,7 @@ sub new {
 }
 
 sub coerce_to_lens {
-    my ($class_self, $maybe_lens) = @_;
+    my (undef, $maybe_lens) = @_;
     if(Scalar::Util::blessed($maybe_lens) && $maybe_lens->isa("Data::Focus::Lens")) {
         return $maybe_lens;
     }else {
