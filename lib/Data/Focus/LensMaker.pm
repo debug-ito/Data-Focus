@@ -20,11 +20,10 @@ sub _create_apply_lens_from_accessors {
     my ($getter, $setter) = @_;
     return sub {
         my ($self, $applicative_class, $part_mapper, $whole) = @_;
-        my @parts = $self->$getter($whole);
         return $applicative_class->build(sub {
             my $ret = $self->$setter($whole, @_);
             return $ret;
-        }, map { $part_mapper->($_) } @parts);
+        }, map { $part_mapper->($_) } $self->$getter($whole));
     };
 }
 
