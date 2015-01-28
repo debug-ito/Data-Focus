@@ -4,6 +4,7 @@ use warnings;
 use Data::Focus::Lens::Composite;
 use Carp;
 use Exporter qw(import);
+use Scalar::Util ();
 
 our $VERSION = "0.01";
 
@@ -36,7 +37,7 @@ sub new {
 
 sub coerce_to_lens {
     my ($class_self, $maybe_lens) = @_;
-    if(eval { $maybe_lens->isa("Data::Focus::Lens") }) {
+    if(Scalar::Util::blessed($maybe_lens) && $maybe_lens->isa("Data::Focus::Lens")) {
         return $maybe_lens;
     }else {
         require Data::Focus::Lens::HashArray::Index;
