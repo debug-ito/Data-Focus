@@ -6,7 +6,7 @@ use parent qw(Data::Focus::Lens);
 sub new {
     my ($class, @lenses) = @_;
     require Data::Focus;
-    @lenses = map { Data::Focus->coerce_to_lens($_) } @lenses;
+    $_ = Data::Focus->coerce_to_lens($_) for @lenses;
     return bless \@lenses, $class;
 }
 
