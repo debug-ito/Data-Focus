@@ -10,17 +10,22 @@ sub new {
     return bless \@lenses, $class;
 }
 
-sub apply_lens {
-    my ($self, $applicative_class, $part_mapper, $whole) = @_;
-    my $top_lens = $self->[0];
+## class method: internal use only.
+sub apply_composite_lens {
+    my (undef, $lenses, $applicative_class, $part_mapper, $whole) = @_;
+    my $top_lens = $lenses->[0];
     if(!defined($top_lens)) {
         return $part_mapper->($whole);
     }
-    foreach my $lens (reverse @{$self}[1 .. $#$self]) {
+    foreach my $lens (reverse @{$lenses}[1 .. $#$lenses]) {
         my $cur_part_mapper = $part_mapper;
         $part_mapper = sub { $lens->apply_lens($applicative_class, $cur_part_mapper, shift) };
     }
     return $top_lens->apply_lens($applicative_class, $part_mapper, $whole);
+}
+
+sub apply_lens {
+    ref($_[0])->apply_composite_lens(@_);
 }
 
 

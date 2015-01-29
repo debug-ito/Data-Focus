@@ -57,11 +57,18 @@ sub into {
 sub _apply_lenses_to_target {
     my ($self, $app_class, $updater, @additional_lenses) = @_;
     my @lenses = (@{$self->{lenses}}, map { $self->coerce_to_lens($_) } @additional_lenses);
-    return Data::Focus::Lens::Composite->new(@lenses)->apply_lens(
-        $app_class,
-        $app_class->create_part_mapper($updater),
-        $self->{target}
-    );
+    if(@lenses == 1) {
+        return $lenses[0]->apply_lens(
+            $app_class, $app_class->create_part_mapper($updater), $self->{target}
+        );
+    }else {
+        return Data::Focus::Lens::Composite->apply_composite_lens(
+            \@lenses,
+            $app_class,
+            $app_class->create_part_mapper($updater),
+            $self->{target}
+        );
+    }
 }
 
 sub get {
