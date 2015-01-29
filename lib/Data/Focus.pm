@@ -19,15 +19,10 @@ sub new {
     my ($class, %args) = @_;
     croak "target param is mandatory" if !exists($args{target});
     my $target = $args{target};
-    my $lenses = [];
-    if(exists($args{lens})) {
-        if(ref($args{lens}) eq "ARRAY") {
-            $lenses = $args{lens};
-        }else {
-            $lenses = [$args{lens}];
-        }
-    }
-    @$lenses = map { $class->coerce_to_lens($_) } @$lenses;
+    my $lenses = exists($args{lens}) ?
+        (ref($args{lens}) eq "ARRAY" ? $args{lens} : [$args{lens}])
+        : [];
+    $_ = $class->coerce_to_lens($_) foreach @$lenses;
     my $self = bless {
         target => $target,
         lenses => $lenses
