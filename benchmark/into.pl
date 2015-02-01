@@ -23,6 +23,7 @@ my $ALL = Data::Focus::Lens::HashArray::All->new;
 my %result = ();
 
 foreach my $level (@levels) {
+    local *STDOUT = *STDERR;
     my $ret = timethese(-3, {
         focus => sub { focus($target)->into((2) x $level) },
         focus_lens => sub { focus($target)->into(($lens) x $level) },
