@@ -42,9 +42,10 @@ sub coerce_to_lens {
 
 sub into {
     my ($self, @lenses) = @_;
+    unshift @lenses, @{$self->{lenses}};
     my $deeper = ref($self)->new(
         target => $self->{target},
-        lens => [@{$self->{lenses}}, map { $self->coerce_to_lens($_) } @lenses]
+        lens => \@lenses,
     );
     return $deeper;
 }
