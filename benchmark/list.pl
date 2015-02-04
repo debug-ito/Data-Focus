@@ -55,7 +55,7 @@ list.pl - benchmark list() method
 
 =head1 SYNOPSIS
 
-    $ list.pl [OPTIONS] LIST_SIZE
+    $ list.pl [OPTIONS] LIST_SIZES
     $ list.pl -c direct -c focus 0 1 2 5 10 > result.json
 
 =head1 OPTIONS
