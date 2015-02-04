@@ -40,7 +40,7 @@ my $ALL = Data::Focus::Lens::HashArray::All->new;
 
 my @cases;
 GetOptions(
-    "c|case" => \@cases,
+    "c|case=s" => \@cases,
     "h|help" => \&usage,
 );
 @cases = qw(direct focus focus_lens) if !@cases;
