@@ -1,5 +1,9 @@
 Revision history for Data-Focus
 
+0.02    2015-02-08
+        [ENHANCEMENT]
+        - Performance improvement (about 40%)
+
 0.01    2015-01-18
         First version, released on an unsuspecting world.
 
