@@ -5,6 +5,7 @@ requires "Exporter";
 requires "Scalar::Util";
 requires "overload";
 requires "Test::More" => "1.00";
+requires "Scalar::Util";
 
 on 'test' => sub {
     requires 'Test::More' => "0";

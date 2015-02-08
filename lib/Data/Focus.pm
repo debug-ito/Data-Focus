@@ -4,6 +4,7 @@ use warnings;
 use Data::Focus::Lens::Composite;
 use Carp;
 use Exporter qw(import);
+use Scalar::Util ();
 
 our $VERSION = "0.01";
 
@@ -18,15 +19,10 @@ sub new {
     my ($class, %args) = @_;
     croak "target param is mandatory" if !exists($args{target});
     my $target = $args{target};
-    my $lenses = [];
-    if(exists($args{lens})) {
-        if(ref($args{lens}) eq "ARRAY") {
-            $lenses = $args{lens};
-        }else {
-            $lenses = [$args{lens}];
-        }
-    }
-    @$lenses = map { $class->coerce_to_lens($_) } @$lenses;
+    my $lenses = exists($args{lens}) ?
+        (ref($args{lens}) eq "ARRAY" ? $args{lens} : [$args{lens}])
+        : [];
+    $_ = $class->coerce_to_lens($_) foreach @$lenses;
     my $self = bless {
         target => $target,
         lenses => $lenses
@@ -35,8 +31,8 @@ sub new {
 }
 
 sub coerce_to_lens {
-    my ($class_self, $maybe_lens) = @_;
-    if(eval { $maybe_lens->isa("Data::Focus::Lens") }) {
+    my (undef, $maybe_lens) = @_;
+    if(Scalar::Util::blessed($maybe_lens) && $maybe_lens->isa("Data::Focus::Lens")) {
         return $maybe_lens;
     }else {
         require Data::Focus::Lens::HashArray::Index;
@@ -46,9 +42,10 @@ sub coerce_to_lens {
 
 sub into {
     my ($self, @lenses) = @_;
+    unshift @lenses, @{$self->{lenses}};
     my $deeper = ref($self)->new(
         target => $self->{target},
-        lens => [@{$self->{lenses}}, map { $self->coerce_to_lens($_) } @lenses]
+        lens => \@lenses,
     );
     return $deeper;
 }
@@ -56,11 +53,18 @@ sub into {
 sub _apply_lenses_to_target {
     my ($self, $app_class, $updater, @additional_lenses) = @_;
     my @lenses = (@{$self->{lenses}}, map { $self->coerce_to_lens($_) } @additional_lenses);
-    return Data::Focus::Lens::Composite->new(@lenses)->apply_lens(
-        $app_class,
-        $app_class->create_part_mapper($updater),
-        $self->{target}
-    );
+    if(@lenses == 1) {
+        return $lenses[0]->apply_lens(
+            $app_class, $app_class->create_part_mapper($updater), $self->{target}
+        );
+    }else {
+        return Data::Focus::Lens::Composite->apply_composite_lens(
+            \@lenses,
+            $app_class,
+            $app_class->create_part_mapper($updater),
+            $self->{target}
+        );
+    }
 }
 
 sub get {

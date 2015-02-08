@@ -3,10 +3,19 @@ use strict;
 use warnings;
 use parent qw(Data::Focus::Applicative::Const);
 
-sub mempty { [] }
-sub mconcat {
-    my ($class, @data) = @_;
-    return [map { @$_ } @data];
+my $PURE = __PACKAGE__->new([]);
+
+sub pure { $PURE }
+
+sub build {
+    my ($class, $builder, @f_parts) = @_;
+    if(@f_parts == 0) {
+        return $PURE;
+    }elsif(@f_parts == 1) {
+        return $f_parts[0];
+    }else {
+        return $class->new([map { @{$_->get_const} } @f_parts]);
+    }
 }
 
 sub create_part_mapper {
