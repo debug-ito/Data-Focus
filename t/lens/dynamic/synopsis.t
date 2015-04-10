@@ -18,10 +18,10 @@ sub new {
 
 sub Lens {
     my ($self, $param) = @_;
-    require Data::Focus::HashArray::Index;
+    require Data::Focus::Lens::HashArray::Index;
     return (
-        Data::Focus::HashArray::Index->new(index => "accessible_by_lens")
-        . Data::Focus::HashArray::Index->new(index => $param)
+        Data::Focus::Lens::HashArray::Index->new(index => "accessible_by_lens")
+        . Data::Focus::Lens::HashArray::Index->new(index => $param)
     );
 }
 

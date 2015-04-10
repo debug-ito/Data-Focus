@@ -1,6 +1,39 @@
 package Data::Focus::Lens::Dynamic;
 use strict;
 use warnings;
+use parent qw(Data::Focus::Lens);
+use Scalar::Util qw(blessed);
+use Carp;
+
+sub new {
+    my ($class, $param) = @_;
+    return bless \$param, $class;
+}
+
+sub _associated_lens {
+    my ($self, $target) = @_;
+    if(my $target_class = blessed($target)) {
+        my $assoc_lens = eval { $target->Lens($$self) };
+        if(eval { $assoc_lens->isa("Data::Focus::Lens") }) {
+            return $assoc_lens;
+        }
+        croak "No associated lens for this target ($target_class)";
+    }
+    my $ref = ref($target);
+    if(!defined($target) || $ref eq "HASH" || $ref eq "ARRAY") {
+        require Data::Focus::Lens::HashArray::Index;
+        return Data::Focus::Lens::HashArray::Index->new(index => $$self);
+    }
+    my $typestr = $ref ? $ref : "non-reference";
+    croak "No associated lens for this target ($typestr)";
+}
+
+sub apply_lens {
+    my ($self, $applicative_class, $part_mapper, $target) = @_;
+    my $assoc_lens = $self->_associated_lens($target);
+    return $assoc_lens->apply_lens($applicative_class, $part_mapper, $target);
+}
+
 
 1;
 __END__
@@ -27,10 +60,10 @@ Data::Focus::Lens::Dynamic - a lens that dynamically creates an appropriate lens
     
     sub Lens {
         my ($self, $param) = @_;
-        require Data::Focus::HashArray::Index;
+        require Data::Focus::Lens::HashArray::Index;
         return (
-            Data::Focus::HashArray::Index->new(index => "accessible_by_lens")
-            . Data::Focus::HashArray::Index->new(index => $param)
+            Data::Focus::Lens::HashArray::Index->new(index => "accessible_by_lens")
+            . Data::Focus::Lens::HashArray::Index->new(index => $param)
         );
     }
     
