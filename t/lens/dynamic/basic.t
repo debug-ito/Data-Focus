@@ -9,7 +9,7 @@ use Data::Focus::Lens::HashArray::Index;
 package OK;
 sub new { return bless {data => [1,2,3]}, shift }
 sub Lens {
-    return Data::Focus::Lens::HashArray::Index->new(index => "data")
+    return Data::Focus::Lens::HashArray::Index->new(index => "data", allow_blessed => 1)
         . Data::Focus::Lens::HashArray::Index->new(index => $_[1]);
 }
 

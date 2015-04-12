@@ -62,7 +62,7 @@ Data::Focus::Lens::Dynamic - a lens that dynamically creates an appropriate lens
         my ($self, $param) = @_;
         require Data::Focus::Lens::HashArray::Index;
         return (
-            Data::Focus::Lens::HashArray::Index->new(index => "accessible_by_lens")
+            Data::Focus::Lens::HashArray::Index->new(index => "accessible_by_lens", allow_blessed => 1)
             . Data::Focus::Lens::HashArray::Index->new(index => $param)
         );
     }
@@ -76,11 +76,11 @@ Data::Focus::Lens::Dynamic - a lens that dynamically creates an appropriate lens
     my $blessed_data = Blessed::Data->new;
     
     my $lens = Data::Focus::Lens::Dynamic->new("a");
-    focus($plain_data)->get($lens);        ## => "a for plain_data"
-    focus($blessed_data)->get($lens);      ## => "a for Blessed::Data"
-
+    focus($plain_data)->get($lens);        ## => "a for plain_data";
+    focus($blessed_data)->get($lens);      ## => "a for Blessed::Data";
+    
     $plain_data->{a} = $blessed_data;
-    focus($plain_data)->get($lens, $lens); ## => "a for Blessed::Data"
+    focus($plain_data)->get($lens, $lens); ## => "a for Blessed::Data";
 
 =head1 DESCRIPTION
 

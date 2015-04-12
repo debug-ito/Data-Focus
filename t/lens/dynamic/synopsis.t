@@ -20,7 +20,7 @@ sub Lens {
     my ($self, $param) = @_;
     require Data::Focus::Lens::HashArray::Index;
     return (
-        Data::Focus::Lens::HashArray::Index->new(index => "accessible_by_lens")
+        Data::Focus::Lens::HashArray::Index->new(index => "accessible_by_lens", allow_blessed => 1)
         . Data::Focus::Lens::HashArray::Index->new(index => $param)
     );
 }
