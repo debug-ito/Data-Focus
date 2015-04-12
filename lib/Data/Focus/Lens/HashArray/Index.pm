@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use parent qw(Data::Focus::Lens);
 use Data::Focus::LensMaker ();
+use Scalar::Util qw(reftype);
 use Carp;
 
 our @CARP_NOT = qw(Data::Focus::Lens Data::Focus);
@@ -22,13 +23,24 @@ sub new {
     my $self = bless {
         indices => $indices,
         immutable => $args{immutable},
+        allow_blessed => $args{allow_blessed},
     }, $class;
     return $self;
 }
 
+sub _type_of {
+    my ($self, $target) = @_;
+    if($self->{allow_blessed}) {
+        my $ref = reftype($target);
+        return defined($ref) ? $ref : "";
+    }else {
+        return ref($target);
+    }
+}
+
 sub _getter {
     my ($self, $whole) = @_;
-    my $type = ref($whole);
+    my $type = $self->_type_of($whole);
     if(!defined($whole)) {
         ## slots for autovivification
         return map { undef } @{$self->{indices}};
@@ -56,7 +68,7 @@ sub _setter {
             return $ret;
         }
     }
-    my $type = ref($whole);
+    my $type = $self->_type_of($whole);
     if($type eq "ARRAY") {
         my @indices = map { int($_) } @{$self->{indices}};
         my $ret = $self->{immutable} ? [@$whole] : $whole;
