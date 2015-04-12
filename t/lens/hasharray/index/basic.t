@@ -8,15 +8,27 @@ use lib "t";
 use testlib::SampleObject;
 use testlib::Identity qw(identical);
 
+sub params {
+    my ($index, $immutable, $allow_blessed) = @_;
+    return (index => $index,
+            immutable => $immutable,
+            allow_blessed => $allow_blessed);
+}
+
 sub lens {
-    my ($index, $immutable) = @_;
-    return Data::Focus::Lens::HashArray::Index->new(index => $index, immutable => $immutable);
+    return Data::Focus::Lens::HashArray::Index->new(@_);
 }
 
 sub make_label {
-    my ($target, $key, $immutable) = @_;
+    my ($target, $key, $immutable, $allow_blessed) = @_;
     my $imm_str = $immutable ? "immutable" : "mutable";
-    return "$target, " . join(":", ref($key) ? @$key : $key) . " ($imm_str)";
+    $allow_blessed ||= 0;
+    return "$target, " . join(":", ref($key) ? @$key : $key) . " ($imm_str, allow_blessed=$allow_blessed)";
+}
+
+sub eval_if_code {
+    my ($maybe_code, @params) = @_;
+    return ref($maybe_code) eq "CODE" ? $maybe_code->(@params) : $maybe_code;
 }
 
 my %targets = (
@@ -36,7 +48,9 @@ my %targets = (
         return \$s;
     },
     obj => sub {
-        testlib::SampleObject->new;
+        my $d = testlib::SampleObject->new;
+        $d->set(foo => "bar");
+        return $d;
     },
     undef => sub { undef },
 );
@@ -58,23 +72,31 @@ foreach my $case (
     {target => "array", key => [2,2,2,2], exp_g => "AAA", exp_l => [("AAA") x 4]},
     {target => "scalar", key => "aaa", exp_g => undef, exp_l => []},
     {target => "scalar_ref", key => "aaa", exp_g => undef, exp_l => []},
-    {target => "obj", key => "aaa", exp_g => undef, exp_l => []},
     {target => "undef", key => "str", exp_g => undef, exp_l => [undef]},
     {target => "undef", key => 10, exp_g => undef, exp_l => [undef]},
     {target => "undef", key => ["key", 10, 11], exp_g => undef, exp_l => [undef, undef, undef]},
+    {target => "obj", key => "aaa", exp_g => undef, exp_l => []},
+    {target => "obj", key => "foo",
+     exp_g => sub { my (%params) = @_; $params{allow_blessed} ? "bar" : undef },
+     exp_l => sub { my (%params) = @_; $params{allow_blessed} ? ["bar"] : [] }},
 ) {
-    foreach my $immutable (0, 1) {
-        my $label = make_label($case->{target}, $case->{key}, $immutable);
-        subtest $label => sub {
-            my $gen = $targets{$case->{target}};
-            my $target = $gen->();
-            my $lens = lens($case->{key}, $immutable);
-            my $got_g = focus($target)->get($lens);
-            is_deeply $got_g, $case->{exp_g}, "get()";
-            my @got_l = focus($target)->list($lens);
-            is_deeply \@got_l, $case->{exp_l}, "list()";
-            is_deeply $target, $gen->(), "target is not modified by getters";
-        };
+    foreach my $allow_blessed (0, 1) {
+        foreach my $immutable (0, 1) {
+            my $label = make_label($case->{target}, $case->{key}, $immutable, $allow_blessed);
+            subtest $label => sub {
+                my $gen = $targets{$case->{target}};
+                my $target = $gen->();
+                my @params = params($case->{key}, $immutable, $allow_blessed);
+                my $lens = lens(@params);
+                my $got_g = focus($target)->get($lens);
+                my $exp_g = eval_if_code($case->{exp_g}, @params);
+                is_deeply $got_g, $exp_g, "get()";
+                my @got_l = focus($target)->list($lens);
+                my $exp_l = eval_if_code($case->{exp_l}, @params);
+                is_deeply \@got_l, $exp_l, "list()";
+                is_deeply $target, $gen->(), "target is not modified by getters";
+            };
+        }
     }
 }
 
@@ -107,27 +129,52 @@ foreach my $case (
 
     {target => "scalar", key => "hoge", val => "XXX", exp => "aaa"},
     {target => "scalar_ref", key => "hoge", val => "XXX", exp => \(999), exp_same_instance => 1},
-    {target => "obj", key => "hoge", val => "XXX", exp => testlib::SampleObject->new(), exp_same_instance => 1},
+    
+    {target => "obj", key => "hoge", val => "XXX",
+     exp => sub {
+         my (%params) = @_;
+         if($params{allow_blessed}) {
+             if($params{immutable}) {
+                 return {foo => "bar", hoge => "XXX"};
+             }else {
+                 my $exp = $targets{obj}->();
+                 $exp->set(hoge => "XXX");
+                 return $exp;
+             }
+         }else {
+             return $targets{obj}->();
+         }
+     },
+     exp_same_instance => sub {
+         my (%params) = @_;
+         return !$params{allow_blessed} || !$params{immutable};
+     }},
 ) {
-    foreach my $immutable (0, 1) {
-        my $label = make_label($case->{target}, $case->{key}, $immutable);
-        subtest $label => sub {
-            my $gen = $targets{$case->{target}};
-            my $target = $gen->();
-            my $lens = lens($case->{key}, $immutable);
-            my $got = focus($target)->set($lens, $case->{val});
-            is_deeply $got, $case->{exp}, "set()";
-            if(ref($target)) {
-                if($case->{exp_same_instance}) {
-                    identical $got, $target, "it returns the same instance, not modified";
-                }elsif($immutable) {
-                    isnt refaddr($got), refaddr($target), "non-destructive update";
-                    is_deeply $target, $gen->(), "target is preserved";
-                }else {
-                    identical $got, $target, "destructive update";
+    foreach my $allow_blessed (0, 1) {
+        foreach my $immutable (0, 1) {
+            my $label = make_label($case->{target}, $case->{key}, $immutable, $allow_blessed);
+            subtest $label => sub {
+                my $gen = $targets{$case->{target}};
+                my $target = $gen->();
+                my @params = params($case->{key}, $immutable, $allow_blessed);
+                my $lens = lens(@params);
+                my $got = focus($target)->set($lens, $case->{val});
+                my $exp = eval_if_code($case->{exp}, @params);
+                is_deeply $got, $exp, "set()";
+                if(ref($target)) {
+                    if(!defined($case->{exp_same_instance})) {
+                        $case->{exp_same_instance} = sub { my (%params) = @_; return !$params{immutable} };
+                    }
+                    my $exp_same_instance = eval_if_code($case->{exp_same_instance}, @params);
+                    if($exp_same_instance) {
+                        identical $got, $target, "destructive update (or not modified at all)";
+                    }else {
+                        isnt refaddr($got), refaddr($target), "non-destructive update";
+                        is_deeply $target, $gen->(), "target is preserved";
+                    }
                 }
-            }
-        };
+            };
+        }
     }
 }
 
@@ -144,11 +191,20 @@ foreach my $case (
     foreach my $immutable (0, 1) {
         my $label = make_label("undef", $case->{key}, $immutable);
         subtest $label => sub {
-            my $lens = lens($case->{key}, $immutable);
+            my $lens = lens(params($case->{key}, $immutable));
             my $got = focus(undef)->set($lens, $case->{val});
             is_deeply $got, $case->{exp};
         };
     }
 }
+
+subtest "by default, immutable=0, allow_blessed=0", sub {
+    my $lens = Data::Focus::Lens::HashArray::Index->new(index => "foo");
+    my $hash_target = $targets{hash}->();
+    focus($hash_target)->set($lens, "HOGE");
+    is $hash_target->{foo}, "HOGE", "destructive set()";
+    my $obj_target = $targets{obj}->();
+    is focus($obj_target)->get($lens), undef, "not focus into blessed objects";
+};
 
 done_testing;

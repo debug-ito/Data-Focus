@@ -9,10 +9,11 @@ use testlib::SampleObject;
 use testlib::Identity qw(check_identity);
 
 sub make_label {
-    my ($target, $key, $immutable) = @_;
+    my ($target, $key, $immutable, $allow_blessed) = @_;
     my $keys = ref($key) ? join(":", @$key) : $key;
     my $imm_str = $immutable ? "immutable" : "mutable";
-    return "$target, $keys ($imm_str)";
+    $allow_blessed ||= 0;
+    return "$target, $keys ($imm_str, allow_blessed=$allow_blessed)";
 }
 
 my $tester = Data::Focus::LensTester->new(
@@ -63,26 +64,32 @@ foreach my $case (
     {target => "array", key => [1, 10, 0], exp_focal_points => 3},
     {target => "array", key => [2,2,2,2], exp_focal_points => 4},
     {target => "scalar_ref", key => "foo", exp_focal_points => 0},
-    {target => "obj", key => "bar", exp_focal_points => 0},
+    {target => "obj", key => "bar", exp_focal_points => 0, test_if => sub {
+        my (%params) =  @_;
+        return !$params{allow_blessed};
+    }},
 ) {
-    foreach my $immutable (0, 1) {
-        my $lens = Data::Focus::Lens::HashArray::Index->new(
-            index => $case->{key}, immutable => $immutable
-        );
-        my $label = make_label($case->{target}, $case->{key}, $immutable);
-        subtest $label => sub {
-            $tester->test_lens_laws(
-                lens => $lens, target => $targets{$case->{target}},
-                exp_focal_points => $case->{exp_focal_points},
-            );
-        };
-        subtest "$label, set() mutation" => sub {
-            foreach my $part ($tester->parts) {
-                my $target = $targets{$case->{target}}->();
-                my $result = focus($target)->set($lens, $part);
-                check_identity($result, $target, ($case->{exp_focal_points} == 0 ? 1 : !$immutable));
-            }
-        };
+    foreach my $allow_blessed (0, 1) {
+        foreach my $immutable (0, 1) {
+            my @params = (index => $case->{key}, immutable => $immutable, allow_blessed => $allow_blessed);
+            next if $case->{test_if} && !$case->{test_if}->(@params);
+            
+            my $lens = Data::Focus::Lens::HashArray::Index->new(@params);
+            my $label = make_label($case->{target}, $case->{key}, $immutable, $allow_blessed);
+            subtest $label => sub {
+                $tester->test_lens_laws(
+                    lens => $lens, target => $targets{$case->{target}},
+                    exp_focal_points => $case->{exp_focal_points},
+                );
+            };
+            subtest "$label, set() mutation" => sub {
+                foreach my $part ($tester->parts) {
+                    my $target = $targets{$case->{target}}->();
+                    my $result = focus($target)->set($lens, $part);
+                    check_identity($result, $target, ($case->{exp_focal_points} == 0 ? 1 : !$immutable));
+                }
+            };
+        }
     }
 }
 
@@ -96,27 +103,34 @@ foreach my $case (
     {target => "undef", key => [1,1,1], exp_focal_points => 3},
     {target => "hash", key => "non-existent", exp_focal_points => 1},
     {target => "array", key => 20, exp_focal_points => 1}, ## out-of-range positive index. writable.
+    {target => "obj", key => "bar", exp_focal_points => 1, test_if => sub {
+        my (%params) =  @_;
+        return $params{allow_blessed};
+    }}
 ) {
-    foreach my $immutable (0, 1) {
-        my $lens = Data::Focus::Lens::HashArray::Index->new(
-            index => $case->{key}, immutable => $immutable
-        );
-        my $label = make_label($case->{target}, $case->{key}, $immutable);
-        my %test_args = (
-            lens => $lens, target => $targets{$case->{target}},
-            exp_focal_points => $case->{exp_focal_points},
-        );
-        subtest $label => sub {
-            $tester->test_set_set(%test_args);
-            $tester->test_set_get(%test_args);
-        };
-        subtest "$label, set() mutation" => sub {
-            foreach my $part ($tester->parts) {
-                my $target = $targets{$case->{target}}->();
-                my $result = focus($target)->set($lens, $part);
-                check_identity($result, $target, ($case->{target} eq "undef" ? 0 : !$immutable));
-            }
-        };
+    foreach my $allow_blessed (0, 1) {
+        foreach my $immutable (0, 1) {
+            my @params = (index => $case->{key}, immutable => $immutable, allow_blessed => $allow_blessed);
+            next if $case->{test_if} && !$case->{test_if}->(@params);
+            
+            my $lens = Data::Focus::Lens::HashArray::Index->new(@params);
+            my $label = make_label($case->{target}, $case->{key}, $immutable, $allow_blessed);
+            my %test_args = (
+                lens => $lens, target => $targets{$case->{target}},
+                exp_focal_points => $case->{exp_focal_points},
+            );
+            subtest $label => sub {
+                $tester->test_set_set(%test_args);
+                $tester->test_set_get(%test_args);
+            };
+            subtest "$label, set() mutation" => sub {
+                foreach my $part ($tester->parts) {
+                    my $target = $targets{$case->{target}}->();
+                    my $result = focus($target)->set($lens, $part);
+                    check_identity($result, $target, ($case->{target} eq "undef" ? 0 : !$immutable));
+                }
+            };
+        }
     }
 }
 

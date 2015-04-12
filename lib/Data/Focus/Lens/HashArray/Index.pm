@@ -157,9 +157,17 @@ When reading, it always returns C<undef>.
 When writing, it autovivifies an array-ref if and only if the indices are all non-negative integers.
 Otherwise, it autovivifies a hash-ref.
 
+=head2 blessed target
+
+By default, the lens creates no focal point for a blessed target.
+This means C<get()> returns C<undef> and C<set()> does nothing.
+
+If C<allow_blessed> option is set to true and the target is made of a hash-ref or array-ref,
+the lens creates focal points as if the target were a regular hash-ref or array-ref.
+
 =head2 other targets
 
-For other types of targets including scalar-refs and blessed objects,
+For other types of targets such as scalar-refs,
 the lens creates no focal point.
 This means C<get()> returns C<undef> and C<set()> does nothing.
 
@@ -179,6 +187,14 @@ Index to focus. When you specify an array-ref, the C<$lens> behaves like slice.
 
 If set to true, the target hash/array is treated as immutable.
 This means every updating operation using the C<$lens> creates a new hash/array in a copy-on-write fashion.
+
+=item C<allow_blessed> => BOOL (optional, default: false)
+
+If set to true, the lens makes focal points for blessed targets if they are made of hash-refs or array-refs.
+
+You should not set this option as well as C<immutable> option,
+bacause in this case you get a plain hash-ref/array-ref from C<set()> method.
+This is confusing.
 
 =back
 
