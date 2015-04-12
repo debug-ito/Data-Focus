@@ -62,7 +62,7 @@ subtest "unknown objects", sub {
         {label => "scalar-ref", target => \$scalar},
     ) {
         my $target = $case->{target};
-        like exception { focus($target)->get(10) }, qr{no associated lens}i, "$case->{label}: focus error OK";
+        like exception { focus($target)->get(dlens(10)) }, qr{no associated lens}i, "$case->{label}: focus error OK";
     }
 };
 
