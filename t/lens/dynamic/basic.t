@@ -5,6 +5,7 @@ use Test::Fatal;
 use Data::Focus qw(focus);
 use Data::Focus::Lens::Dynamic;
 use Data::Focus::Lens::HashArray::Index;
+use Data::Focus::Lens::Composite;
 
 package OK;
 sub new { return bless {data => [1,2,3]}, shift }
@@ -43,6 +44,7 @@ is_deeply focus(undef)->set(dlens("foo"), "bar"), {foo => "bar"}, "undef set aut
         a => [9, 10, OK->new]
     };
     is focus($nested)->get(map { dlens($_) } "a", 2, 0), 1, "nested data OK";
+    is focus($nested)->get(Data::Focus::Lens::Composite->new(map { dlens($_) } "a", 2, 0)), 1, "nested data (triple composite) OK";
 }
 
 subtest "blessed objects failure", sub {
