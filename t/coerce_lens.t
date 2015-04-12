@@ -19,6 +19,7 @@ sub create_target {
 {
     my $lens = Data::Focus->coerce_to_lens("bar");
     isa_ok $lens, "Data::Focus::Lens";
+    isa_ok $lens, "Data::Focus::Lens::Dynamic";
     is focus(create_target())->get($lens), "buzz", "coerce_to_lens() creates a valid lens";
 }
 

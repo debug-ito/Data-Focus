@@ -35,8 +35,8 @@ sub coerce_to_lens {
     if(Scalar::Util::blessed($maybe_lens) && $maybe_lens->isa("Data::Focus::Lens")) {
         return $maybe_lens;
     }else {
-        require Data::Focus::Lens::HashArray::Index;
-        return Data::Focus::Lens::HashArray::Index->new(index => $maybe_lens); ## default lens (for now)
+        require Data::Focus::Lens::Dynamic;
+        return Data::Focus::Lens::Dynamic->new($maybe_lens);
     }
 }
 
@@ -213,6 +213,10 @@ Recursively traverse all values in a tree of hashes and arrays.
 
 Composition of multiple lenses.
 
+=item L<Data::Focus::Lens::Dynamic>
+
+A front-end lens that dynamically creates an appropriate lens for you.
+
 =back
 
 All Data::Focus::HashArray::* modules optionally support immutable update. See individual documents for detail.
@@ -222,7 +226,8 @@ All Data::Focus::HashArray::* modules optionally support immutable update. See i
 If you pass something that's not a L<Data::Focus::Lens> object to L<Data::Focus>'s methods,
 it is coerced (cast) to a lens.
 
-Currently, the passed value is treated as the C<index> argument of L<Data::Focus::Lens::HashArray::Index>'s constructor.
+The passed value is used to create L<Data::Focus::Lens::Dynamic> lens.
+Then that lens creates an appropriate lens for the given target with the passed value.
 This means we can rewrite the above example to:
 
     use Data::Focus qw(focus);
@@ -231,9 +236,8 @@ This means we can rewrite the above example to:
     my $part = focus($target)->get(1, "foo");
     focus($target)->set(1, foo => "buzz");
 
-We are planning a more dynamic mechanism of lens coercion in future releases.
-However, as long as the target is a hash-ref or array-ref, L<Data::Focus::Lens::HashArray::Index> will always be used for coercion,
-i.e., the above example is guaranteed to work.
+The above is possible because L<Data::Focus::Lens::Dynamic> creates L<Data::Focus::Lens::HashArray::Index> lenses under the hood.
+See L<Data::Focus::Lens::Dynamic> for detail.
 
 =head2 Traversals
 
@@ -371,6 +375,33 @@ However, B<< writing your own Lens class from scratch is currently discouraged. 
 Instead we recommend using L<Data::Focus::LensMaker>.
 
 L<Data::Focus::LensTester> provides some common tests for lenses.
+
+=head1 MAKE YOUR OWN CLASS LENS-READY
+
+You can associate your own class with a specific lens object by implementing C<Lens()> method in your class.
+See L<Data::Focus::Lens::Dynamic> for detail.
+
+Once C<Lens()> method is implemented, you can focus into objects of that class without explicitly creating lens objects for it.
+
+    package My::Class;
+    
+    ...
+    
+    sub Lens {
+        my ($self, $param);
+        my $lens = ...; ## create a Data::Focus::Lens object
+        return $lens;
+    }
+    
+    
+    package main;
+    use Data::Focus qw(focus);
+    
+    my $obj = My::Class->new(...);
+    
+    focus($obj)->get("hoge");
+    focus($obj)->set(foo => "bar");
+
 
 =head1 RELATIONSHIP TO HASKELL
 
