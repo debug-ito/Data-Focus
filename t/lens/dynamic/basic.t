@@ -47,24 +47,28 @@ is_deeply focus(undef)->set(dlens("foo"), "bar"), {foo => "bar"}, "undef set aut
     is focus($nested)->get(Data::Focus::Lens::Composite->new(map { dlens($_) } "a", 2, 0)), 1, "nested data (triple composite) OK";
 }
 
-subtest "blessed objects failure", sub {
-    foreach my $class (qw(NoLensMethod Throwing NotALens)) {
-        my $target = $class->new;
-        my $error = exception { focus($target)->get(dlens(1)) };
-        like $error, qr{no associated lens}i, "focusing into $class object throws exception";
-        like $error, qr{$class}, "... the excecption includes the class name";
-    }
+subtest "Lens() throwing an exception", sub {
+    my $target = Throwing->new;
+    like exception { focus($target)->get(dlens(1)) }, qr{Lens\(\) dies}, "The thrown error propagates to the top";
 };
 
-subtest "unknown objects", sub {
+subtest "Lens() returning a non-lens", sub {
+    my $target = NotALens->new;
+    like exception { focus($target)->get(dlens(1)) }, qr{Lens method did not return a Data::Focus::Lens},
+        "it should raise an exception";
+};
+
+subtest "zero focal points", sub {
     my $scalar = "hoge";
     foreach my $case (
         {label => "string", target => "string"},
         {label => "int", target => 10},
         {label => "scalar-ref", target => \$scalar},
+        {label => "no Lens method", target => NoLensMethod->new},
     ) {
         my $target = $case->{target};
-        like exception { focus($target)->get(dlens(10)) }, qr{no associated lens}i, "$case->{label}: focus error OK";
+        my @ret = focus($target)->list(dlens(10));
+        is_deeply \@ret, [], "$case->{label}: zero focal points";
     }
 };
 

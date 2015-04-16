@@ -204,8 +204,8 @@ This means every updating operation using the C<$lens> creates a new hash/array 
 
 If set to true, the lens makes focal points for blessed targets if they are made of hash-refs or array-refs.
 
-You should not set this option as well as C<immutable> option,
-bacause in this case you get a plain hash-ref/array-ref from C<set()> method.
+You should not set this option together with C<immutable> option,
+bacause in this case you get a plain (unblessed) hash-ref/array-ref from C<set()> method.
 This is confusing.
 
 =back

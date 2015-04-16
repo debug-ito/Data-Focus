@@ -12,26 +12,29 @@ sub new {
 
 sub _associated_lens {
     my ($self, $target) = @_;
-    if(my $target_class = blessed($target)) {
-        my $assoc_lens = eval { $target->Lens($$self) };
-        if(eval { $assoc_lens->isa("Data::Focus::Lens") }) {
-            return $assoc_lens;
+    if(blessed($target) && $target->can("Lens")) {
+        my $assoc_lens = $target->Lens($$self);
+        if(! eval { $assoc_lens->isa("Data::Focus::Lens") }) {
+            croak "Lens method did not return a Data::Focus::Lens";
         }
-        croak "No associated lens for this target ($target_class)";
+        return $assoc_lens;
     }
     my $ref = ref($target);
     if(!defined($target) || $ref eq "HASH" || $ref eq "ARRAY") {
         require Data::Focus::Lens::HashArray::Index;
         return Data::Focus::Lens::HashArray::Index->new(index => $$self);
     }
-    my $typestr = $ref ? $ref : "non-reference";
-    croak "No associated lens for this target ($typestr)";
+    return undef;
 }
 
 sub apply_lens {
     my ($self, $applicative_class, $part_mapper, $target) = @_;
     my $assoc_lens = $self->_associated_lens($target);
-    return $assoc_lens->apply_lens($applicative_class, $part_mapper, $target);
+    if(defined($assoc_lens)) {
+        return $assoc_lens->apply_lens($applicative_class, $part_mapper, $target);
+    }else {
+        return $applicative_class->pure($target);
+    }
 }
 
 
@@ -105,11 +108,11 @@ Here's how L<Data::Focus::Lens::Dynamic> creates the lens object appropriate for
 
 =item *
 
-If the C<$target> is a B<blessed object>, it tries to call its C<Lens()> method to obtain the appropriate lens.
+If the C<$target> is a B<< blessed object and has C<Lens()> method >>, it calls the C<Lens()> method to obtain the appropriate lens.
 
     $appropriate_lens = $target->Lens($param)
 
-If calling C<Lens()> method throws an exception or the return value is not a L<Data::Focus::Lens> object, it throws an exception.
+If C<Lens()> method doesn't return a L<Data::Focus::Lens> object, it throws an exception.
 
 =item *
 
@@ -119,7 +122,7 @@ If the C<$target> is a non-blessed B<< hash-ref or array-ref or C<undef> >>, it 
 
 =item *
 
-B<Otherwise>, it throws an exception.
+B<Otherwise>, it does nothing. It creates no focal points.
 
 =back
 
