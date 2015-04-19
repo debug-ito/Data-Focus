@@ -25,10 +25,16 @@ sub lens {
 
 {
     my $target = testlib::AccessorSample->new;
+    is_deeply [$target->list], [], "at first, 'list' field returns an empty list";
     $target->list(1,2,3);
     is_deeply [$target->list], [1,2,3], "list returning method ok";
     is focus($target)->get(lens("list")), 1, "get(): accessor method is accessed in scalar context";
     is_deeply [focus($target)->list(lens("list"))], [1], "list(): accessor method is accessed in scalar context as well";
+    
+    my $ret = focus($target)->over(lens("list"), sub { $_[0] * 100 });
+    identical $ret, $target, "over() returns the identical target";
+    is_deeply [focus($target)->list(lens("list"))], [100], "list(): still accessed in scalar context";
+    is_deeply [$target->list], [100], "list field is actually crushed into a single value by over()";
 }
 
 {
