@@ -25,6 +25,14 @@ sub lens {
 
 {
     my $target = testlib::AccessorSample->new;
+    $target->list(1,2,3);
+    is_deeply [$target->list], [1,2,3], "list returning method ok";
+    is focus($target)->get(lens("list")), 1, "get(): accessor method is accessed in scalar context";
+    is_deeply [focus($target)->list(lens("list"))], [1], "list(): accessor method is accessed in scalar context as well";
+}
+
+{
+    my $target = testlib::AccessorSample->new;
     like exception { focus($target)->get(lens("bomb")) }, qr{boom}, "exception from the accessor method propagates.";
 }
 

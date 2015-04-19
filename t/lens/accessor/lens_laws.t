@@ -15,20 +15,19 @@ my $tester = Data::Focus::LensTester->new(
 
 {
     my $target_code = sub { testlib::AccessorSample->new };
-    subtest "existent method", sub {
-        $tester->test_lens_laws(
-            lens => Data::Focus::Lens::Accessor->new(method => "foo"),
-            target => $target_code,
-            exp_focal_points => 1
-        );
-    };
-    subtest "non-existent method", sub {
-        $tester->test_lens_laws(
-            lens => Data::Focus::Lens::Accessor->new(method => "hogehoge"),
-            target => $target_code,
-            exp_focal_points => 0
-        );
-    };
+    foreach my $case (
+        {label => "existent method", method => "foo", exp_focal_points => 1},
+        {label => "non-existent method", method => "hogehoge", exp_focal_points => 0},
+        {label => "list returning method", method => "list", exp_focal_points => 1},
+    ) {
+        subtest $case->{label}, sub {
+            $tester->test_lens_laws(
+                lens => Data::Focus::Lens::Accessor->new(method => $case->{method}),
+                target => $target_code,
+                exp_focal_points => $case->{exp_focal_points}
+            );
+        };
+    }
 }
 
 foreach my $case (
