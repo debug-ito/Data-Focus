@@ -8,9 +8,10 @@ BEGIN {
         "",
         "::Applicative", "::Applicative::Identity", "::Applicative::Const",
         "::Applicative::Const::First", "::Applicative::Const::List",
-        "::Lens", "::Lens::Composite", "::Lens::HashArray::Index",
-        "::Lens::HashArray::All", "::Lens::HashArray::Recurse",
-        "::LensTester", "::LensMaker",
+        "::Lens", "::LensTester", "::LensMaker",
+        ( map { "::Lens::$_" }
+          "Composite", "Dynamic", "Accessor",
+          "HashArray::Index","HashArray::All", "HashArray::Recurse"),
     ) {
         use_ok( "Data::Focus$name" );
     }
