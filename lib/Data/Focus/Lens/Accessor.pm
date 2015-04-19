@@ -1,6 +1,39 @@
 package Data::Focus::Lens::Accessor;
 use strict;
 use warnings;
+use parent qw(Data::Focus::Lens);
+use Data::Focus::LensMaker ();
+use Carp;
+
+our @CARP_NOT = qw(Data::Focus::Lens Data::Focus);
+
+sub new {
+    my ($class, %args) = @_;
+    croak "method is mandatory" if !defined($args{method});
+    my $self = bless {
+        method => $args{method}
+    }, $class;
+    return $self;
+}
+
+sub _getter {
+    my ($self, $target) = @_;
+    my $method = $self->{method};
+    if(!eval { $target->can($method) }) {
+        return ();
+    }
+    my $v = $target->$method;
+    return $v;
+}
+
+sub _setter {
+    my ($self, $target, $v) = @_;
+    my $method = $self->{method};
+    $target->$method($v);
+    return $target;
+}
+
+Data::Focus::LensMaker::make_lens_from_accessors(\&_getter, \&_setter);
 
 
 1;
