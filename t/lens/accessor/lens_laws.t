@@ -18,7 +18,6 @@ my $tester = Data::Focus::LensTester->new(
     foreach my $case (
         {label => "existent method", method => "foo", exp_focal_points => 1},
         {label => "non-existent method", method => "hogehoge", exp_focal_points => 0},
-        {label => "list returning method", method => "list", exp_focal_points => 1},
     ) {
         subtest $case->{label}, sub {
             $tester->test_lens_laws(
@@ -28,7 +27,17 @@ my $tester = Data::Focus::LensTester->new(
             );
         };
     }
+    subtest "list returning method (it doesnt hold get-set law)", sub {
+        my %args = (
+            lens => Data::Focus::Lens::Accessor->new(method => "list"),
+            target => $target_code,
+            exp_focal_points => 1,
+        );
+        $tester->test_set_get(%args);
+        $tester->test_set_set(%args);
+    };
 }
+
 
 foreach my $case (
     {label => "undef", target => sub { undef }},
