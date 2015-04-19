@@ -28,6 +28,7 @@ sub _getter {
 
 sub _setter {
     my ($self, $target, $v) = @_;
+    return $target if @_ <= 2;
     my $method = $self->{method};
     $target->$method($v);
     return $target;
