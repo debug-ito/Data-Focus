@@ -209,6 +209,10 @@ Access all values in a hash/array. It's like C<< values(%$hash), @$array >>.
 
 Recursively traverse all values in a tree of hashes and arrays.
 
+=item L<Data::Focus::Lens::Accessor>
+
+Call an accessor method of a blessed object. It's like C<< $obj->method >>.
+
 =item L<Data::Focus::Lens::Composite>
 
 Composition of multiple lenses.
